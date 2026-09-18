@@ -1,0 +1,2646 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,interactive-widget=resizes-content">
+<title>Roadtrip Companion</title>
+<meta name="description" content="A personal road-trip copilot for Southern France, Spain and Portugal.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#101317">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Roadtrip">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#101317; --surf:#181D23; --surf2:#20262E; --surf3:#2A323B;
+  --line:#2E3742; --line2:#3C4753;
+  --txt:#ECEBE6; --txt2:#AFBAC5; --mut:#7F8C99;
+  --gold:#E5A83B; --gold-dim:#8A6520; --pine:#5C9C84; --rust:#C4613F; --sky:#6E97C9;
+  --on-gold:#1A1206;
+  --shadow:0 10px 30px -12px rgba(0,0,0,.7);
+  --r:18px; --r-sm:12px; --r-lg:26px;
+  --nav-h:calc(58px + env(safe-area-inset-bottom,0px));
+  --kb:0px; --sheet-max:92vh;
+  --display:"Bricolage Grotesque",system-ui,sans-serif;
+  --body:"Inter",system-ui,-apple-system,sans-serif;
+}
+:root:not([data-theme="dark"]){
+  --ink:#F2F1EC; --surf:#FFFFFF; --surf2:#EAE8E1; --surf3:#DFDCD3;
+  --line:#DAD6CB; --line2:#C6C1B4;
+  --txt:#161A1F; --txt2:#3F4952; --mut:#6C7681;
+  --gold:#A9721A; --gold-dim:#E8D6AE; --pine:#3C7761; --rust:#A84A2A; --sky:#3E6796;
+  --on-gold:#FFF9EE;
+  --shadow:0 10px 24px -14px rgba(20,25,30,.35);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:var(--ink); color:var(--txt); font-family:var(--body);
+  font-size:15.5px; line-height:1.5; overscroll-behavior-y:none;
+  -webkit-font-smoothing:antialiased;
+}
+#app{min-height:100%;padding-bottom:calc(var(--nav-h) + 8px)}
+#view{padding:0 14px 24px;max-width:720px;margin:0 auto}
+h1,h2,h3,h4{font-family:var(--display);margin:0;letter-spacing:-.02em;line-height:1.12}
+h1{font-size:27px;font-weight:700}
+h2{font-size:19px;font-weight:700}
+h3{font-size:16.5px;font-weight:700}
+p{margin:0 0 8px}
+button{font-family:inherit;font-size:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:16px;color:var(--txt);background:var(--surf2);border:1px solid var(--line);border-radius:12px;padding:11px 12px;width:100%}
+input:focus,select,textarea:focus,button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--mut) 50%),linear-gradient(135deg,var(--mut) 50%,transparent 50%);background-position:calc(100% - 18px) 52%,calc(100% - 13px) 52%;background-size:5px 5px;background-repeat:no-repeat}
+.mut{color:var(--mut)} .t2{color:var(--txt2)}
+.sm{font-size:13px} .xs{font-size:11.5px}
+.row{display:flex;align-items:center;gap:10px}
+.between{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.wrap{flex-wrap:wrap}
+.grow{flex:1;min-width:0}
+.ell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hide{display:none!important}
+.stack{display:grid;gap:10px}
+
+/* ---------- top bar ---------- */
+.topbar{position:sticky;top:0;z-index:40;background:linear-gradient(var(--ink) 72%,transparent);padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 10px;max-width:720px;margin:0 auto}
+.brandmark{width:30px;height:30px;border-radius:9px;background:var(--gold);color:var(--on-gold);display:grid;place-items:center;flex:none}
+.brandmark svg{width:18px;height:18px}
+.iconbtn{width:42px;height:42px;border-radius:13px;background:var(--surf);border:1px solid var(--line);display:grid;place-items:center;flex:none}
+.iconbtn svg{width:20px;height:20px}
+.iconbtn.on{background:var(--gold);color:var(--on-gold);border-color:transparent}
+
+/* ---------- cards ---------- */
+.card{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.card.flat{background:transparent}
+.card.pad0{padding:0;overflow:hidden}
+.sect{margin-top:22px}
+.sect>.between{margin-bottom:10px}
+.link{color:var(--gold);font-weight:600;font-size:13.5px}
+
+/* ---------- pills / chips ---------- */
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600;background:var(--surf2);color:var(--txt2);border:1px solid var(--line);white-space:nowrap}
+.pill.good{color:var(--pine);border-color:color-mix(in srgb,var(--pine) 40%,transparent)}
+.pill.warn{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 40%,transparent)}
+.pill.bad{color:var(--rust);border-color:color-mix(in srgb,var(--rust) 40%,transparent)}
+.chiprow{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 14px 2px;margin:0 -14px}
+.chiprow::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:9px 14px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-size:13.5px;font-weight:600;color:var(--txt2);min-height:40px;display:flex;align-items:center;gap:6px}
+.chip.on{background:var(--txt);color:var(--ink);border-color:transparent}
+.chip.dog.on{background:var(--pine);color:#fff}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 18px;border-radius:14px;background:var(--surf2);border:1px solid var(--line);font-weight:600;font-size:15px}
+.btn.primary{background:var(--gold);color:var(--on-gold);border-color:transparent}
+.btn.ghost{background:transparent}
+.btn.sm{min-height:38px;padding:0 13px;font-size:13.5px;border-radius:11px}
+.btn.block{width:100%}
+.btn svg{width:18px;height:18px}
+.btn:active{transform:scale(.985)}
+.qgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px}
+.qa{display:flex;align-items:center;gap:9px;min-height:52px;padding:0 12px;background:var(--surf);border:1px solid var(--line);border-radius:14px;font-size:13.5px;font-weight:600;text-align:left;line-height:1.2}
+.qa span.i{font-size:17px}
+
+/* ---------- day plan cards (the signature element) ---------- */
+.plan{background:var(--surf);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;position:relative;overflow:hidden}
+.plan.sel{border-color:var(--gold)}
+.plan .tag{font-family:var(--display);font-size:11.5px;font-weight:700;letter-spacing:.06em;color:var(--gold)}
+.plan h2{font-size:21px;margin:2px 0 10px}
+.facts{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.tl{position:relative;padding-left:16px;display:grid;gap:9px}
+.tl:before{content:"";position:absolute;left:3px;top:6px;bottom:6px;width:2px;background:linear-gradient(var(--gold),color-mix(in srgb,var(--gold) 15%,transparent))}
+.tl .stop{position:relative;display:grid;grid-template-columns:44px 1fr auto;gap:9px;align-items:baseline}
+.tl .stop:before{content:"";position:absolute;left:-16px;top:7px;width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px var(--surf)}
+.tl .t{font-family:var(--display);font-weight:700;font-size:13.5px;color:var(--txt2);font-variant-numeric:tabular-nums}
+.tl .n{font-size:14.5px;font-weight:500}
+.tl .d{font-size:11.5px;color:var(--mut)}
+
+/* ---------- place cards ---------- */
+.thumb{position:relative;width:100%;aspect-ratio:16/10;display:grid;place-items:center;overflow:hidden}
+.thumb .gl{position:absolute;inset:0}
+.thumb .em{font-size:40px;filter:drop-shadow(0 3px 8px rgba(0,0,0,.35))}
+.thumb .cap{position:absolute;left:10px;bottom:8px;right:10px;font-family:var(--display);font-weight:700;font-size:17px;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.6)}
+.thumb .badge{position:absolute;right:8px;top:8px}
+.hcard{display:grid;grid-template-columns:86px 1fr;gap:0;background:var(--surf);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;text-align:left;width:100%}
+.hcard .th{position:relative;display:grid;place-items:center}
+.hcard .th .em{font-size:26px}
+.hcard .bd{padding:11px 12px;min-width:0}
+.hscroll{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding:0 14px 4px;margin:0 -14px}
+.hscroll::-webkit-scrollbar{display:none}
+.hscroll>*{flex:none;width:214px}
+
+/* ---------- scorecard ---------- */
+.score{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.score div{background:var(--surf);padding:9px 11px}
+.score .k{font-size:11px;color:var(--mut)}
+.score .v{font-size:14px;font-weight:600;font-family:var(--display)}
+.verdict{border-left:3px solid var(--gold);padding:2px 0 2px 12px;font-size:15px;line-height:1.45}
+
+/* ---------- sheet / modal ---------- */
+.scrim{position:fixed;inset:0;background:rgba(6,8,10,.62);z-index:60;opacity:0;transition:opacity .2s}
+.scrim.in{opacity:1}
+/* A bottom-anchored sheet gets pushed behind the Android keyboard, which looks
+   like the app has changed screen. On phones the sheet is a full-height panel
+   with a sticky header instead: the keyboard simply covers the lower part and
+   the form scrolls. Bottom-sheet behaviour returns on wide screens. */
+.sheet{position:fixed;left:0;right:0;top:0;bottom:0;z-index:61;background:var(--ink);
+  display:flex;flex-direction:column;transform:translateY(100%);
+  transition:transform .26s cubic-bezier(.2,.8,.2,1)}
+.sheet.in{transform:none}
+.sheet .grab{display:none}
+.sheet .sc{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:6px 16px calc(env(safe-area-inset-bottom,0px) + 90px);-webkit-overflow-scrolling:touch}
+.sheet .hd{display:flex;align-items:flex-start;gap:10px;flex:none;z-index:2;background:var(--ink);
+  padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 12px;border-bottom:1px solid var(--line)}
+
+/* ---------- bottom nav ---------- */
+body.kb nav.bn{display:none}
+nav.bn{position:fixed;left:0;right:0;bottom:0;z-index:50;height:var(--nav-h);padding-bottom:env(safe-area-inset-bottom,0px);background:color-mix(in srgb,var(--ink) 92%,transparent);backdrop-filter:blur(14px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr)}
+nav.bn button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--mut);font-size:10.5px;font-weight:600;position:relative}
+nav.bn button svg{width:23px;height:23px}
+nav.bn button.on{color:var(--gold)}
+nav.bn button.on:before{content:"";position:absolute;top:0;width:26px;height:2px;border-radius:2px;background:var(--gold)}
+
+/* ---------- map ---------- */
+#mapwrap{position:fixed;inset:0;bottom:var(--nav-h);background:var(--surf2)}
+#mapcv{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+#mkl{position:absolute;inset:0;pointer-events:none}
+.mk{position:absolute;transform:translate(-50%,-100%);pointer-events:auto;display:grid;place-items:center;width:34px;height:34px;border-radius:50% 50% 50% 4px;rotate:45deg;background:var(--surf);border:1.5px solid var(--line2);box-shadow:0 4px 10px rgba(0,0,0,.45)}
+.mk>span{rotate:-45deg;font-size:15px;line-height:1}
+.mk.cl{border-radius:50%;rotate:0deg;background:var(--gold);border-color:transparent;color:var(--on-gold);font-family:var(--display);font-weight:800;font-size:14px;width:36px;height:36px}
+.mk.sv{border-color:var(--gold)} .mk.vs{border-color:var(--pine)} .mk.pk{background:var(--sky);border-color:transparent}
+.maptools{position:absolute;right:12px;bottom:14px;display:grid;gap:8px}
+.attrib{position:absolute;left:8px;bottom:6px;font-size:9.5px;color:var(--mut);background:color-mix(in srgb,var(--ink) 70%,transparent);padding:2px 6px;border-radius:6px}
+
+/* ---------- misc ---------- */
+.banner{display:flex;gap:9px;align-items:center;background:var(--surf2);border:1px dashed var(--line2);border-radius:14px;padding:10px 12px;font-size:13px;color:var(--txt2)}
+.empty{text-align:center;padding:34px 18px;color:var(--mut)}
+.empty .em{font-size:34px;display:block;margin-bottom:8px}
+.toast{position:fixed;left:50%;bottom:calc(var(--nav-h) + 14px);transform:translate(-50%,14px);z-index:80;background:var(--txt);color:var(--ink);padding:11px 16px;border-radius:999px;font-size:14px;font-weight:600;opacity:0;transition:.22s;pointer-events:none;max-width:88vw;text-align:center}
+.toast.in{opacity:1;transform:translate(-50%,0)}
+.seg{display:flex;background:var(--surf2);border:1px solid var(--line);border-radius:13px;padding:3px;gap:3px}
+.seg button{flex:1;min-height:38px;border-radius:10px;font-size:13.5px;font-weight:600;color:var(--txt2)}
+.seg button.on{background:var(--surf);color:var(--txt);box-shadow:var(--shadow)}
+.fld{display:grid;gap:6px}
+.fld>label{font-size:12.5px;color:var(--mut);font-weight:600}
+.sw{width:50px;height:30px;border-radius:999px;background:var(--surf3);border:1px solid var(--line2);position:relative;flex:none;transition:.18s}
+.sw:after{content:"";position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:var(--txt2);transition:.18s}
+.sw.on{background:var(--pine);border-color:transparent}
+.sw.on:after{left:23px;background:#fff}
+.tlday{position:relative;padding-left:18px}
+.tlday:before{content:"";position:absolute;left:4px;top:4px;bottom:4px;width:2px;background:var(--line2)}
+.tlday .dot{position:absolute;left:-18px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--line2)}
+.tlday .dot.on{background:var(--gold)}
+.bar{height:6px;border-radius:3px;background:var(--surf3);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--gold)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (min-width:700px){
+  .sheet{top:auto;bottom:var(--kb);max-width:720px;margin:0 auto;height:auto;max-height:var(--sheet-max);
+    border-radius:24px 24px 0 0;border-top:1px solid var(--line2);transform:translateY(102%)}
+  .sheet.in{transform:none}
+  .sheet .grab{display:block;width:42px;height:4px;border-radius:2px;background:var(--line2);margin:9px auto 2px}
+  .sheet .hd{padding:6px 16px 12px}
+  .sheet .sc{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 22px)}
+  #view{padding:0 20px 30px}
+  .qgrid{grid-template-columns:repeat(4,1fr)}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar" id="topbar"></div>
+  <main id="view"></main>
+</div>
+<nav class="bn" id="nav"></nav>
+<div id="layers"></div>
+<div class="toast" id="toast"></div>
+<script>
+/* =====================================================================
+   Roadtrip Companion — a personal road-trip copilot
+   Single-file PWA. No build step. Works fully offline once cached.
+   Layers:  data → store → services → views → shell
+   ===================================================================== */
+"use strict";
+const $ = (s,r=document)=>r.querySelector(s);
+const el = (h)=>{const d=document.createElement('div');d.innerHTML=h.trim();return d.firstElementChild;};
+const esc = (s='')=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+const pad=n=>String(n).padStart(2,'0');
+const hhmm=m=>pad(Math.floor(m/60)%24)+':'+pad(Math.round(m%60));
+const mins2h=m=>m<60?`${Math.round(m)} min`:(m%60<5?`${Math.floor(m/60)}h`:`${Math.floor(m/60)}h${pad(Math.round(m%60))}`);
+const todayISO=(d=new Date())=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const uid=p=>p+'_'+Math.random().toString(36).slice(2,9);
+function haversine(a,b){const R=6371,dLat=(b.lat-a.lat)*Math.PI/180,dLng=(b.lng-a.lng)*Math.PI/180,
+  la1=a.lat*Math.PI/180,la2=b.lat*Math.PI/180;
+  const h=Math.sin(dLat/2)**2+Math.cos(la1)*Math.cos(la2)*Math.sin(dLng/2)**2;
+  return 2*R*Math.asin(Math.min(1,Math.sqrt(h)));}
+/* Road distance ≈ crow-flies × 1.25 + 3 km of local roads. Average speed rises
+   with distance: village hops crawl, long legs run on motorway. */
+const driveKm =(a,b)=>Math.round(haversine(a,b)*1.25+3);
+const driveMin=(a,b)=>{ const km=haversine(a,b)*1.25+3;
+  return Math.max(4,Math.round(km/clamp(40+0.30*km,40,95)*60)); };
+
+/* =====================================================================
+   1. DEMO DATA  (clearly separated: every record carries source:'demo')
+   ===================================================================== */
+const REGIONS={
+  'gironde':{name:'Bordeaux & Gironde',country:'France',flag:'🇫🇷',c:{lat:44.84,lng:-0.58}},
+  'landes':{name:'Landes & Arcachon',country:'France',flag:'🇫🇷',c:{lat:44.6,lng:-1.15}},
+  'basque-fr':{name:'French Basque Country',country:'France',flag:'🇫🇷',c:{lat:43.42,lng:-1.55}},
+  'basque-es':{name:'Basque Country',country:'Spain',flag:'🇪🇸',c:{lat:43.31,lng:-2.0}},
+  'cantabria':{name:'Cantabria',country:'Spain',flag:'🇪🇸',c:{lat:43.39,lng:-4.2}},
+  'asturias':{name:'Asturias',country:'Spain',flag:'🇪🇸',c:{lat:43.4,lng:-5.5}},
+  'galicia':{name:'Galicia',country:'Spain',flag:'🇪🇸',c:{lat:42.9,lng:-8.4}},
+  'minho':{name:'Minho & Porto',country:'Portugal',flag:'🇵🇹',c:{lat:41.4,lng:-8.4}},
+  'douro':{name:'Douro Valley',country:'Portugal',flag:'🇵🇹',c:{lat:41.2,lng:-7.6}},
+  'centro-pt':{name:'Centro & Aveiro',country:'Portugal',flag:'🇵🇹',c:{lat:40.6,lng:-8.5}},
+};
+const CATS={
+  detour:{n:'Worth a detour',e:'⭐'}, food:{n:'Food',e:'🍽️'}, nature:{n:'Nature',e:'🌿'},
+  village:{n:'Villages',e:'🏘️'}, city:{n:'Cities',e:'🏛️'}, beach:{n:'Beaches',e:'🏖️'},
+  hike:{n:'Hikes',e:'🥾'}, view:{n:'Viewpoints',e:'👁️'}, market:{n:'Markets',e:'🧺'},
+  castle:{n:'Castles',e:'🏰'}, motorsport:{n:'Motorsport',e:'🏁'}, product:{n:'Local products',e:'🧀'},
+};
+const DOG={ in:{l:'Inside too',t:'good'}, out:{l:'Outdoors only',t:'warn'}, leash:{l:'On leash',t:'good'},
+  no:{l:'Not allowed',t:'bad'}, unk:{l:'Unknown',t:''} };
+const PARK={ easy:{l:'Easy',t:'good'}, moderate:{l:'Fiddly',t:'warn'}, hard:{l:'Painful',t:'bad'}, none:{l:'No car access',t:'bad'} };
+const CROWD={1:'Quiet',2:'Moderate',3:'Busy',4:'Very touristy'};
+
+/* P(id,name,lat,lng,cat,region,visitMin,visitMax,cost,park,dog,crowd,scenic,food,uniq,best,why,tags) */
+function P(id,name,lat,lng,cat,region,vmin,vmax,cost,park,dog,crowd,scenic,food,uniq,best,why,tags,hours){
+  return {id,name,coordinates:{lat,lng},category:cat,region,country:REGIONS[region].country,
+    visitDuration:[vmin,vmax],costEstimate:cost,parkingDifficulty:park,dogStatus:dog,crowdLevel:crowd,
+    scenic,foodValue:food,uniqueness:uniq,bestTime:best,why,tags:tags.split(' '),openingHours:hours||null,
+    weatherSuitability:tags.includes('indoor')?'rain':(tags.includes('shade')?'hot':'fair'),
+    photos:[],source:'demo'};
+}
+const PLACES=[
+/* --- French Basque Country --- */
+P('sjdl','Saint-Jean-de-Luz',43.3889,-1.66,'village','basque-fr',120,180,8,'moderate','out',3,3,3,2,'morning',
+ 'The most pleasant coastal stop between Biarritz and the border. Big sheltered bay, walkable old streets, good bakeries. Park in the Ravel car park and walk in — the centre is a nightmare in August.','outdoor food beach village free dog hot-ok','Shops 10:00–19:30, most close 13:00–15:00'),
+P('espelette','Espelette',43.3417,-1.445,'village','basque-fr',60,90,5,'easy','out',3,3,2,3,'morning',
+ 'One street, red peppers hanging off every balcony, and half a dozen serious food shops. Forty-five minutes is genuinely enough unless you are shopping properly.','outdoor village product food hot-ok dog','Shops 10:00–18:30'),
+P('ainhoa','Ainhoa',43.3069,-1.4986,'village','basque-fr',45,60,0,'easy','out',3,1,2,3,'any',
+ 'A single ridiculously photogenic street of red-and-white Labourdine houses. Free, quick, no queues. Best paired with Espelette — they are 12 minutes apart.','outdoor village free dog scenic-road hot-ok'),
+P('rhune','La Rhune rack railway',43.3094,-1.635,'view','basque-fr',150,210,25,'moderate','in',3,3,1,3,'morning',
+ 'Wooden train up to 900 m with the whole coast behind you. Dogs travel free on board. Book the first departure — later trains sell out and cloud rolls in after noon.','outdoor view nature dog hike','First train 09:00, closed in high wind'),
+P('hondarribia','Hondarribia old town',43.3644,-1.7928,'village','basque-fr',90,150,12,'moderate','out',3,3,2,2,'evening',
+ 'Walled upper town, almost empty at 18:00, then pintxos down in Calle San Pedro. A better evening than Biarritz and 20 minutes closer to San Sebastián.','outdoor village food dog evening'),
+P('biarritz','Biarritz & Côte des Basques',43.4832,-1.5586,'city','basque-fr',120,180,15,'hard','out',4,3,2,2,'evening',
+ 'Handsome but busy and parking is the worst on this stretch of coast. Come for the surf beach at golden hour, skip the middle of the day.','outdoor city beach food'),
+P('bayonne-market','Les Halles de Bayonne',43.4923,-1.4758,'market','basque-fr',60,90,20,'moderate','out',3,1,3,2,'morning',
+ 'Proper working market hall: ham, Ossau-Iraty, piperade, oysters at the back with a glass of white. Tuesday–Saturday mornings only, dead by 13:30.','indoor market food rain-ok product','Tue–Sat 07:00–13:30'),
+/* --- Spanish Basque --- */
+P('donostia','San Sebastián old town',43.3183,-1.9812,'city','basque-es',150,240,30,'hard','out',3,4,3,3,'evening',
+ 'The pintxos crawl is the point: one dish and one drink per bar, then move. Parking underground at Boulevard, never on the street. Dogs are fine on terraces, rarely inside bars.','outdoor city food dog'),
+P('igueldo','Monte Igueldo',43.3167,-2.0083,'view','basque-es',45,75,6,'moderate','out',3,1,2,2,'evening',
+ 'The postcard view over La Concha. Take the 1912 funicular rather than driving the hairpins. Twenty minutes at the top is plenty.','outdoor view city dog','Funicular 11:00–20:00'),
+P('getaria','Getaria',43.3053,-2.2011,'village','basque-es',90,150,28,'moderate','out',2,3,4,3,'lunch',
+ 'Fishing village built for one thing: whole turbot grilled over coals on the street. Elkano is the famous one, but any of the parrillas on the harbour will do it properly.','outdoor village food dog'),
+P('zumaia','Itzurun flysch cliffs',43.2986,-2.2586,'nature','basque-es',90,120,3,'moderate','leash',2,3,1,3,'morning',
+ 'Sixty million years of rock stacked like a sliced loaf. Walk the cliff path towards Sakoneta rather than staying on the beach. Low tide doubles what you can see.','outdoor nature beach hike dog free'),
+P('gaztelugatxe','San Juan de Gaztelugatxe',43.447,-2.785,'nature','basque-es',120,150,2,'hard','no',4,3,1,3,'morning',
+ 'Free but ticketed, and 241 steps in full sun. Genuinely spectacular. Dogs are not allowed on the island path, so this is a Dog Mode no unless one of you waits at the top.','outdoor nature view hike'),
+P('bilbao','Bilbao & Guggenheim',43.2687,-2.934,'city','basque-es',180,300,25,'moderate','out',3,3,3,3,'any',
+ 'Worth it on a wet day — the museum plus the Ribera market hall fills six hours indoors. Otherwise a long detour from the coast for a building you can see from outside in ten minutes.','indoor city food rain-ok market','Museum Tue–Sun 10:00–20:00'),
+/* --- Cantabria / Asturias --- */
+P('santillana','Santillana del Mar',43.393,-4.108,'village','cantabria',75,120,10,'easy','out',3,2,2,2,'morning',
+ 'Cobbled, handsome, and completely given over to coach parties by 11:00. Arrive before 10:00 and it is lovely. Car parks on the edge, the centre is pedestrian.','outdoor village food history'),
+P('comillas','Comillas & El Capricho',43.387,-4.293,'castle','cantabria',90,120,7,'easy','out',2,2,2,3,'morning',
+ 'Gaudí built a sunflower-tiled summer house here and almost nobody goes. Ninety minutes including the garden. Dogs in the grounds, not inside.','outdoor castle history view'),
+P('llanes','Llanes & Playa de Toró',43.4217,-4.755,'beach','asturias',120,180,5,'moderate','leash',3,3,2,2,'morning',
+ 'Small harbour town with rock-stack beaches on both sides. Toró has shade at the edges and is dog-tolerant outside July–August.','outdoor beach village dog food hot-ok'),
+P('covadonga','Lagos de Covadonga',43.27,-4.99,'nature','asturias',180,300,9,'hard','leash',3,1,4,3,'morning',
+ 'Two glacial lakes at 1,100 m in the Picos. In summer the road is closed to cars and you take the shuttle from Cangas — check before committing the morning. Cool air, good for the dog.','outdoor nature hike view dog hot-ok shade'),
+P('cudillero','Cudillero',43.562,-6.147,'village','asturias',90,120,22,'moderate','out',3,3,3,3,'lunch',
+ 'Painted houses stacked in a ravine around a tiny port. Park at the top and walk down — never drive into the bowl. Lunch here is better than anywhere for 40 km.','outdoor village food view dog'),
+P('gijon','Gijón & Cimavilla',43.5453,-5.6619,'city','asturias',120,180,20,'moderate','out',2,3,2,2,'evening',
+ 'Useful stop rather than a destination: long beach promenade, cider houses in the old quarter, easy parking by the marina.','outdoor city food beach dog'),
+/* --- Galicia --- */
+P('catedrais','Praia das Catedrais',43.5539,-7.1567,'beach','galicia',90,120,0,'moderate','leash',3,3,1,4,'morning',
+ 'Rock arches you can only walk under at low tide — and you must reserve a free slot in summer. Check the tide table first or you will arrive to a wet beach and nothing to see.','outdoor beach nature view free'),
+P('lugo','Lugo Roman walls',43.0121,-7.5559,'city','galicia',75,120,12,'easy','leash',1,2,3,3,'any',
+ 'You can walk the complete 2 km circuit on top of the walls, for free, with the dog. Quietly one of the best hours in inland Galicia, and the tapas are still free with a drink.','outdoor city history food free dog'),
+P('santiago','Santiago de Compostela',42.8805,-8.5457,'city','galicia',180,300,25,'hard','out',4,3,3,4,'morning',
+ 'Granite old town that works even in rain, which is just as well. Park at Xoán XXIII and walk in. Dogs are fine in the streets and squares, not in the cathedral.','outdoor city history food market rain-ok'),
+P('combarro','Combarro',42.4325,-8.705,'village','galicia',60,90,18,'moderate','out',3,3,3,3,'evening',
+ 'A row of stone granaries standing in the sea and one alley of seafood terraces behind them. Forty-five minutes plus however long lunch takes.','outdoor village food view dog'),
+P('finisterre','Cabo Fisterra',42.8828,-9.272,'view','galicia',60,90,0,'easy','leash',2,1,3,3,'evening',
+ 'The end of the road, literally. Only worth it at sunset or in big weather; at midday it is a car park with a lighthouse.','outdoor view nature free dog'),
+P('carnota','Praia de Carnota',42.82,-9.11,'beach','galicia',90,150,0,'easy','leash',1,1,2,3,'any',
+ 'Seven kilometres of almost empty sand behind dunes. Cold water, huge sky, the best off-leash run of the whole Atlantic coast.','outdoor beach nature free dog'),
+P('baiona','Baiona',42.12,-8.85,'village','galicia',90,150,20,'easy','out',2,3,2,2,'evening',
+ 'Yacht harbour, a walkable fortress headland, and reliable seafood. A comfortable last Spanish night before crossing into Portugal.','outdoor village food castle dog'),
+/* --- Minho & Porto --- */
+P('viana','Viana do Castelo',41.6932,-8.8329,'city','minho',120,180,18,'easy','out',2,3,2,2,'any',
+ 'Underrated: Renaissance square, a funicular up to Santa Luzia, and a proper beach across the river. Better value than Porto for a night.','outdoor city view food beach dog'),
+P('geres','Peneda-Gerês (Cascata do Arado)',41.73,-8.2,'hike','minho',180,300,3,'moderate','leash',2,1,3,3,'morning',
+ 'Granite, oak woods, waterfalls with swimming pools under them. Roads are slow and narrow — budget 30% more driving time than the map says. Shade and water make it the best hot-day option inland.','outdoor nature hike view dog shade hot-ok free'),
+P('guimaraes','Guimarães castle & old town',41.4425,-8.2918,'castle','minho',150,240,15,'moderate','out',3,2,3,3,'morning',
+ 'Where Portugal started. Compact, genuinely medieval, and the Teleférico up Penha gives you the view without the climb. Dogs in the streets and castle grounds.','outdoor castle city history food dog'),
+P('bomjesus','Bom Jesus do Monte, Braga',41.5548,-8.3778,'view','minho',75,120,4,'easy','out',3,1,3,2,'morning',
+ 'Baroque staircase up a wooded hill, plus a water-powered funicular from 1882 that still works. Take the funicular up, walk down in the shade.','outdoor view history dog shade hot-ok'),
+P('porto','Porto — Ribeira & Bolhão',41.1579,-8.6291,'city','minho',240,360,35,'hard','out',4,4,3,4,'morning',
+ 'Do not drive into Porto. Park at Casa da Música or use the metro from Matosinhos. Bolhão market early, Ribeira late, and cross the bridge to the port lodges in between.','outdoor city food market history rain-ok'),
+P('matosinhos','Matosinhos grilled fish',41.1845,-8.7,'food','minho',90,120,25,'easy','out',2,4,2,2,'lunch',
+ 'A whole street of charcoal grills by the fish market, half the Porto price and easy parking. This is where you eat sardines and robalo, not in the Ribeira.','outdoor food dog','Lunch 12:00–15:00, dinner 19:00–22:30'),
+P('caramulo','Museu do Caramulo',40.565,-8.165,'motorsport','centro-pt',90,150,12,'easy','no',1,2,1,4,'any',
+ 'Bugattis, Ferraris and a Rolls that belonged to the king, in a mountain village nobody stops in. Add the mountain road up for one of the best drives in northern Portugal. Indoors, so a good rain plan.','indoor motorsport rain-ok history scenic-road','Daily 10:00–13:00, 14:00–18:00'),
+P('pinhao','Pinhão & the Douro terraces',41.19,-7.545,'view','douro',180,300,30,'moderate','out',2,3,3,4,'evening',
+ 'Drive the N-222 along the south bank at the end of the day when the light comes down the valley. Stop at a quinta for a tasting; most take walk-ins outside harvest.','outdoor view food scenic-road product dog'),
+P('amarante','Amarante',41.271,-8.082,'village','minho',75,120,14,'easy','out',2,3,2,2,'lunch',
+ 'Bridge, river, and a pastry shop tradition that is genuinely odd. A good halfway break between Porto and the Douro rather than a destination.','outdoor village food dog'),
+P('costanova','Costa Nova, Aveiro',40.62,-8.75,'beach','centro-pt',90,150,6,'easy','leash',3,2,2,3,'morning',
+ 'Striped fishermen huts along the lagoon and a wide dune beach behind them. Flat, breezy, easy parking — a soft day after mountain driving.','outdoor beach village view dog hot-ok'),
+/* --- France north --- */
+P('pilat','Dune du Pilat',44.5892,-1.2128,'nature','landes',120,150,10,'moderate','leash',4,1,3,4,'evening',
+ 'A 100 m sand mountain with the Atlantic on one side and pine forest on the other. Climb it late — the sand is unbearable for paws in the afternoon heat. No shade at all.','outdoor nature view hike beach'),
+P('arcachon','Arcachon & Cap Ferret oysters',44.6586,-1.1681,'food','landes',120,180,28,'moderate','out',3,3,4,3,'lunch',
+ 'Oyster shacks on the water at L\u2019Herbe and Le Canon: a dozen oysters, bread, white wine, plastic chairs. Far better than anything in Arcachon town.','outdoor food village dog'),
+P('stemilion','Saint-Émilion',44.8936,-0.1556,'village','gironde',120,180,30,'moderate','out',4,3,3,3,'morning',
+ 'Beautiful, and priced accordingly. Park outside and walk down. The monolithic church tour is the one thing you cannot see from the street.','outdoor village food product history'),
+P('bordeaux','Bordeaux — Chartrons & Capucins',44.8378,-0.5792,'city','gironde',180,300,30,'hard','out',3,4,2,3,'morning',
+ 'Skip the wine museum, do the Marché des Capucins on a Sunday morning instead — oysters and white wine at 10:00 with the whole city. Trams are easier than driving.','outdoor city food market history'),
+P('nogaro','Circuit Paul Armagnac, Nogaro',43.77,-0.04,'motorsport','gironde',90,180,10,'easy','leash',1,2,1,3,'any',
+ 'Small working circuit in the middle of Armagnac country. Check the calendar before detouring — on a track day you can watch from the fence for almost nothing.','outdoor motorsport dog'),
+];
+const PLACE_BY_ID = Object.fromEntries(PLACES.map(p=>[p.id,p]));
+/* Live place index: the demo dataset plus anything you add yourself.
+   Everything downstream — planner, Explore, map, worth-it — reads through these. */
+const allPlaces = () => PLACES.concat(Store.s.userPlaces || []);
+const getPlace  = id => PLACE_BY_ID[id] || (Store.s.userPlaces || []).find(p => p.id === id) || null;
+
+/* ---- Local food & products ---- */
+function F(id,name,region,what,why,how,price,where,travels,souvenir,emoji){
+  return {id,name,region,what,why,how,priceRange:price,whereToLook:where,travelsWell:travels,goodSouvenir:souvenir,emoji,source:'demo'};
+}
+const FOODS=[
+ F('idiazabal','Idiazabal','basque-es','Hard raw sheep\u2019s cheese, sometimes lightly smoked.','Made only from Latxa sheep milk in the Basque hills.','Thin slices with quince paste and walnuts, never cooked.','€18–28/kg','Any market stall or a caserío sign by the road.',true,true,'🧀'),
+ F('espelette-p','Piment d\u2019Espelette','basque-fr','Mild smoky chilli, sold as powder or strings.','Ten villages around Espelette are allowed to use the name.','A pinch on eggs, fish, or in piperade. It seasons, it does not burn.','€6–12 a jar','Espelette high street, or Bayonne market.',true,true,'🌶️'),
+ F('pintxos','Pintxos','basque-es','Small plates on the bar, paid per item.','San Sebastián\u2019s entire social structure.','One and a drink, then change bar. Point, do not sit.','€2.50–4 each','Calle 31 de Agosto, Gros for cheaper.',false,false,'🍢'),
+ F('sagardoa','Basque cider (sagardoa)','basque-fr','Dry, flat, sharp cider poured from the barrel.','Cider houses in Astigarraga have done this since the 1500s.','Poured in a thin stream into a wide glass, drunk immediately.','€4–7 a bottle','Sidrerías, or supermarkets near Hernani.',true,true,'🍏'),
+ F('ossau','Ossau-Iraty','basque-fr','Firm, nutty mountain sheep cheese.','Pyrenean pastures on the French side.','With cherry jam. Travels well if kept in paper, not plastic.','€20–30/kg','Bayonne market hall.',true,true,'🧈'),
+ F('cider-ast','Asturian sidra','asturias','Cloudy, funky, poured from a height.','Asturias drinks 80% of Spain\u2019s cider.','A waiter pours a splash; drink it in one and pass the glass on.','€3–4 a bottle','Any sidrería in Gijón or Villaviciosa.',true,false,'🍺'),
+ F('cabrales','Cabrales','asturias','Serious blue cheese from cave-aged cow milk.','Aged in natural caves in the Picos foothills.','With cider, on bread. Double-wrap it or your car will smell for days.','€22–32/kg','Arenas de Cabrales, on the road to the lakes.',false,true,'🫓'),
+ F('percebes','Percebes','galicia','Goose barnacles, prised off Atlantic rocks.','Harvested by percebeiros at real personal risk.','Bite and pull. Expensive and worth trying once.','€60–120/kg','Costa da Morte marisquerías.',false,false,'🦪'),
+ F('albarino','Albariño','galicia','Crisp, saline white from the Rías Baixas.','Granite soil and Atlantic fog.','Cold, with anything from the sea.','€6–15 a bottle','Cambados, or any Galician supermarket.',true,true,'🍾'),
+ F('pulpo','Pulpo á feira','galicia','Boiled octopus, paprika, olive oil, coarse salt.','A fair-day dish from inland Galicia, not the coast.','On a wooden plate with bread and young red wine.','€14–20','Pulperías at markets, best on fair days.',false,false,'🐙'),
+ F('nata','Pastéis de nata','minho','Custard tart with a shattering laminated shell.','Born in Belém but perfected everywhere.','Warm, with cinnamon, standing up, before 11:00.','€1–1.50 each','Any pastelaria with a queue of locals.',false,false,'🥧'),
+ F('conservas','Conservas','minho','Tinned sardines, mackerel, tuna belly.','Portugal\u2019s canneries are a century-old craft.','On bread with olive oil. The perfect car food.','€3–9 a tin','Any grocer; the pretty shops charge triple.',true,true,'🐟'),
+ F('bifana','Bifana','minho','Thin marinated pork in a crusty roll.','The standard Portuguese roadside lunch.','With mustard and a beer, two minutes at the counter.','€3–4.50','Roadside cafés and market bars.',false,false,'🥪'),
+ F('vinhoverde','Vinho verde','minho','Light, faintly fizzy young white.','Grown on pergolas across the Minho.','Very cold, in a tumbler, with grilled fish.','€3–6 a bottle','Supermarkets; look for Loureiro grapes.',true,true,'🍷'),
+ F('portwine','Tawny port','douro','Barrel-aged port, nutty rather than sweet-jammy.','Aged in Vila Nova de Gaia lodges.','Lightly chilled after dinner. A 10-year tawny is the sweet spot.','€12–35 a bottle','Quintas along the N-222 near Pinhão.',true,true,'🥃'),
+ F('huitres','Cap Ferret oysters','landes','Arcachon basin oysters, sold by the dozen.','Grown in the basin you are looking at.','Raw, with bread, butter and a glass of Entre-Deux-Mers.','€10–16 a dozen','Oyster shacks at L\u2019Herbe and Le Canon.',false,false,'🦪'),
+ F('canele','Canelé','gironde','Small rum-and-vanilla cake, burnt crust, custard inside.','A Bordeaux convent invention.','Room temperature, eaten the same day.','€1.20–2 each','Bordeaux bakeries; Baillardran is the safe bet.',false,false,'🍮'),
+ F('jambon','Jambon de Bayonne','basque-fr','Air-dried ham, salted with Salies-de-Béarn salt.','Cured in the Adour valley for at least seven months.','Sliced paper-thin with a piece of Ossau-Iraty.','€30–45/kg','Les Halles de Bayonne.',true,true,'🍖'),
+];
+
+/* ---- Events: generated relative to today so the radar always has content ---- */
+function mkEvents(){
+  const d0=new Date(); const day=n=>{const d=new Date(d0);d.setDate(d.getDate()+n);return todayISO(d);};
+  const E=(id,name,kind,region,lat,lng,off,time,cost,why,dog)=>({id,name,kind,region,
+    coordinates:{lat,lng},date:day(off),time,cost,why,dogFriendly:dog,source:'demo'});
+  return [
+    E('ev1','Pintxos & txakoli street night','festival','basque-es',43.3203,-1.9856,0,'19:00','From €3',
+      'Gros neighbourhood puts tables outside and every bar runs one dish for €3. Locals, not tourists.',true),
+    E('ev2','Getaria harbour fish grill','food','basque-es',43.3053,-2.2011,0,'12:30','€15–25',
+      'Saturday grills on the quay. Turn up, queue ten minutes, eat whatever came in this morning.',true),
+    E('ev3','Bayonne covered market','market','basque-fr',43.4923,-1.4758,1,'07:30','Free entry',
+      'The big Saturday market. Get there before 10:00 for the ham and cheese stalls.',true),
+    E('ev4','Fête basque — Ainhoa','festival','basque-fr',43.3069,-1.4986,1,'18:00','Free',
+      'Village fête: force basque games, a brass band, and a very long table. Dogs everywhere.',true),
+    E('ev5','Classic car meet, Circuit de Nogaro','motorsport','gironde',43.77,-0.04,2,'10:00','€10',
+      'Pre-1975 touring cars on track, paddock open. Two hours is enough unless you love it.',true),
+    E('ev6','Medieval market, Santillana del Mar','market','cantabria',43.393,-4.108,3,'11:00','Free',
+      'Costumes, forge demonstrations, a lot of mead. Go early, the streets jam by midday.',true),
+    E('ev7','Feira de Barcelos','market','minho',41.5388,-8.6151,4,'08:00','Free',
+      'One of Portugal\u2019s biggest weekly fairs: pottery, livestock, roast chicken. Thursday only.',true),
+    E('ev8','Douro harvest tasting, Pinhão','food','douro',41.19,-7.545,5,'16:00','€20',
+      'Quinta opens the cellar for walk-ins during harvest. Book by phone the day before if you can.',false),
+    E('ev9','Concert in the cloister, Santiago','concert','galicia',42.8805,-8.5457,5,'21:30','€12',
+      'Early music in a stone courtyard. Cool and dry whatever the weather does.',false),
+    E('ev10','Flea market, Porto (Vandoma)','market','minho',41.1454,-8.6153,6,'08:00','Free',
+      'Saturday-morning junk and treasure along the city wall. Finished by 13:00.',true),
+  ];
+}
+const EVENTS=mkEvents();
+
+/* ---- Default trip skeleton ---- */
+function defaultTrip(){
+  const start=new Date(); const d=n=>{const x=new Date(start);x.setDate(x.getDate()+n);return todayISO(x);};
+  const B=(id,name,region,lat,lng,from,to,acc,notes,parking)=>({id,name,region,coordinates:{lat,lng},
+    arrival:from,departure:to,accommodation:acc,notes,parking,source:'demo'});
+  return {
+    id:'trip_1',name:'Atlantic coast: France → Spain → Portugal',
+    startDate:d(-6),endDate:d(19),totalKm:0,
+    bases:[
+      B('b1','Bordeaux','gironde',44.8378,-0.5792,d(-6),d(-4),'Apartment, Chartrons','Tram A two stops to the centre.','Public garage Cité du Vin, €14/night'),
+      B('b2','Biarritz','basque-fr',43.4832,-1.5586,d(-4),d(-1),'Guesthouse, Bidart','Dog allowed, no cats on site.','Free street parking 200 m uphill'),
+      B('b3','San Sebastián','basque-es',43.3183,-1.9812,d(-1),d(3),'Flat in Gros','Fourth floor, lift. Bins on Tuesdays.','Garage Kursaal, €22/night'),
+      B('b4','Llanes','asturias',43.4217,-4.755,d(3),d(6),'Casa rural','Big garden for the dog.','Driveway'),
+      B('b5','Santiago de Compostela','galicia',42.8805,-8.5457,d(6),d(9),'Pension, old town','Five minutes from the cathedral.','Xoán XXIII car park'),
+      B('b6','Porto','minho',41.1579,-8.6291,d(9),d(14),'Apartment, Foz','Tram line 1 into the centre along the river.','Resident zone — permit from host'),
+      B('b7','Douro / Pinhão','douro',41.19,-7.545,d(14),d(17),'Quinta guesthouse','Steep access road, take it slowly.','On site'),
+      B('b8','Aveiro','centro-pt',40.6405,-8.6538,d(17),d(19),'Hotel near the canals','Last stop before turning for home.','Hotel garage'),
+    ]};
+}
+
+/* =====================================================================
+   2. STORE — localStorage now, written so a sync adapter can drop in later
+   ===================================================================== */
+const Store = (()=>{
+  const KEY='rtc.v1';
+  const fresh=()=>({
+    version:1, updatedAt:Date.now(),
+    trip:defaultTrip(),
+    activeBaseId:'b3',
+    manualLocation:null,         // {name,lat,lng} when geolocation is off/denied
+    prefs:{
+      dogMode:true, theme:'dark', likes:['scenic','food','product','village','city','view','nature','market','hike','history','festival','motorsport'],
+      maxDriveMin:120, intensity:'normal', startTime:'09:30', returnTime:'19:00',
+      avoidCrowds:true, currency:'EUR', units:'km', askedLocation:false
+    },
+    saved:[], visited:[], plans:[], parking:null, foodLog:[], notes:{}, scans:[], routes:[], userPlaces:[],
+    activeDay:null, dayLog:[],
+    weatherCache:null, syncQueue:[]
+  });
+  let s;
+  try{ const raw=localStorage.getItem(KEY); s=raw?JSON.parse(raw):fresh(); }catch(e){ s=fresh(); }
+  if(!s||!s.prefs) s=fresh();
+  if(!s.userPlaces) s.userPlaces=[];   // migration from v1
+  if(!s.dayLog) s.dayLog=[];           // migration from v2
+  let t=null;
+  const persist=()=>{ s.updatedAt=Date.now(); try{ localStorage.setItem(KEY,JSON.stringify(s)); }catch(e){ Shell.toast('Storage full — clear some photos'); } };
+  const api={
+    get s(){return s;},
+    save(){ clearTimeout(t); t=setTimeout(persist,120); },   // debounced write
+    reset(){ s=fresh(); persist(); location.reload(); },
+    export(){ return JSON.stringify(s,null,1); },
+    import(json){ s=JSON.parse(json); persist(); location.reload(); },
+    /* --- saved places --- */
+    isSaved:id=>s.saved.some(x=>x.placeId===id),
+    toggleSave(id){
+      const i=s.saved.findIndex(x=>x.placeId===id);
+      if(i>=0) s.saved.splice(i,1); else s.saved.push({placeId:id,savedAt:Date.now()});
+      api.save(); return i<0;
+    },
+    /* --- visits --- */
+    visit:id=>s.visited.find(v=>v.placeId===id),
+    markVisited(id,rating){
+      let v=api.visit(id);
+      if(!v){ v={id:uid('v'),placeId:id,date:todayISO(),rating:rating||'good',notes:'',photos:[]}; s.visited.unshift(v); }
+      else if(rating) v.rating=rating;
+      api.save(); return v;
+    },
+    unvisit(id){ s.visited=s.visited.filter(v=>v.placeId!==id); api.save(); },
+    /* --- plans --- */
+    savePlan(p){ s.plans=s.plans.filter(x=>x.id!==p.id); s.plans.unshift(p); s.plans=s.plans.slice(0,24); api.save(); },
+    /* --- food --- */
+    boughtFood(fid){ if(!s.foodLog.some(f=>f.foodId===fid)) s.foodLog.unshift({foodId:fid,date:todayISO(),place:api.base()?.name||''}); api.save(); },
+    /* --- base / location --- */
+    base(){ return s.trip.bases.find(b=>b.id===s.activeBaseId)||s.trip.bases[0]; },
+    nextBase(){ const i=s.trip.bases.findIndex(b=>b.id===s.activeBaseId); return s.trip.bases[i+1]||null; },
+    here(){
+      if(Geo.live) return {name:Geo.live.name||'Current position',...Geo.live};
+      if(s.manualLocation) return s.manualLocation;
+      const b=api.base(); return {name:b.name,lat:b.coordinates.lat,lng:b.coordinates.lng};
+    },
+    region(){
+      const h=api.here();
+      let best=null,bd=1e9;
+      for(const [k,r] of Object.entries(REGIONS)){ const d=haversine(h,r.c); if(d<bd){bd=d;best=k;} }
+      return best;
+    }
+  };
+  return api;
+})();
+
+/* =====================================================================
+   3. SERVICES
+   ===================================================================== */
+const Config = {
+  weather:{ provider:'open-meteo', base:'https://api.open-meteo.com/v1/forecast', key:null },
+  tiles:{ url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png', attribution:'© OpenStreetMap contributors', maxZoom:18 },
+  search:{ provider:'nominatim', base:'https://nominatim.openstreetmap.org/search',
+            reverse:'https://nominatim.openstreetmap.org/reverse' },
+  routing:{ provider:'openrouteservice', base:'https://api.openrouteservice.org/v2/directions', key:null },
+  events:{ provider:'demo', base:null, key:null },
+  ai:{ provider:'none', base:null, key:null, model:null },
+  // Keys are never committed here. They are read at runtime from settings and
+  // kept in local storage only; every service degrades to demo mode without one.
+  keyFor(svc){ try{ return JSON.parse(localStorage.getItem('rtc.keys')||'{}')[svc]||null; }catch(e){ return null; } },
+  setKey(svc,v){ let k={}; try{k=JSON.parse(localStorage.getItem('rtc.keys')||'{}');}catch(e){} k[svc]=v||undefined; localStorage.setItem('rtc.keys',JSON.stringify(k)); }
+};
+
+/* ---- Geolocation: optional, never blocking ---- */
+const Geo = {
+  live:null, status:'idle', // idle | asking | ok | denied | unavailable
+  ask(){
+    if(!navigator.geolocation){ Geo.status='unavailable'; return Promise.resolve(null); }
+    Geo.status='asking'; Views.render();
+    return new Promise(res=>{
+      navigator.geolocation.getCurrentPosition(
+        p=>{ Geo.live={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy,at:Date.now()};
+             Geo.status='ok'; Store.s.prefs.askedLocation=true; Store.save(); Weather.refresh(); Views.render();
+             /* name the spot so the header reads "Getaria", not "Current position" */
+             Geocode.reverse(Geo.live.lat,Geo.live.lng).then(r=>{ if(r&&Geo.live){ Geo.live.name=r.name; Views.render(); } });
+             res(Geo.live); },
+        e=>{ Geo.status=e.code===1?'denied':'unavailable'; Store.s.prefs.askedLocation=true; Store.save(); Views.render(); res(null); },
+        {enableHighAccuracy:false,timeout:8000,maximumAge:300000});
+    });
+  }
+};
+
+/* ---- Weather: Open-Meteo, cached, with an honest offline fallback ---- */
+const Weather = (()=>{
+  const CODES={0:['Clear','☀️'],1:['Mostly clear','🌤️'],2:['Partly cloudy','⛅'],3:['Overcast','☁️'],
+    45:['Fog','🌫️'],48:['Freezing fog','🌫️'],51:['Light drizzle','🌦️'],53:['Drizzle','🌦️'],55:['Heavy drizzle','🌧️'],
+    61:['Light rain','🌦️'],63:['Rain','🌧️'],65:['Heavy rain','🌧️'],71:['Snow','🌨️'],80:['Showers','🌦️'],
+    81:['Showers','🌧️'],82:['Heavy showers','⛈️'],95:['Thunderstorms','⛈️'],96:['Thunderstorms','⛈️'],99:['Thunderstorms','⛈️']};
+  let cur=null, loading=false;
+  function mock(loc){
+    // Deterministic seasonal stand-in so the app is never blank offline.
+    const m=new Date().getMonth(), h=new Date().getHours();
+    const base=[11,12,14,16,19,23,26,26,23,19,14,11][m] + (loc.lat<42?2:0);
+    const temp=Math.round(base + Math.sin((h-4)/24*Math.PI*2)*4);
+    const code=(m>=5&&m<=8)?(loc.lng<-7?1:0):(loc.lng<-7?61:2);
+    return {temp,feels:temp-1,code,rain:code>=51?55:(code>=1?15:5),wind:16,
+      hourly:Array.from({length:12},(_,i)=>({h:(h+i)%24,t:Math.round(temp+Math.sin((h+i-4)/24*Math.PI*2)*4-2),r:code>=51?50:8})),
+      daily:Array.from({length:5},(_,i)=>({d:i,hi:base+3-i%2,lo:base-6,code:i%3===0?61:1})),
+      at:Date.now(),stale:true,source:'offline estimate'};
+  }
+  async function fetchLive(loc){
+    const u=`${Config.weather.base}?latitude=${loc.lat.toFixed(3)}&longitude=${loc.lng.toFixed(3)}`+
+      `&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m`+
+      `&hourly=temperature_2m,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max`+
+      `&forecast_days=5&timezone=auto`;
+    const r=await fetch(u,{cache:'no-store'});
+    if(!r.ok) throw new Error('weather '+r.status);
+    const j=await r.json(), hIdx=new Date().getHours();
+    return {
+      temp:Math.round(j.current.temperature_2m), feels:Math.round(j.current.apparent_temperature),
+      code:j.current.weather_code, rain:j.hourly.precipitation_probability?.[hIdx]??0,
+      wind:Math.round(j.current.wind_speed_10m),
+      hourly:j.hourly.time.slice(hIdx,hIdx+12).map((t,i)=>({h:new Date(t).getHours(),
+        t:Math.round(j.hourly.temperature_2m[hIdx+i]),r:j.hourly.precipitation_probability[hIdx+i]})),
+      daily:j.daily.time.map((t,i)=>({d:i,hi:Math.round(j.daily.temperature_2m_max[i]),
+        lo:Math.round(j.daily.temperature_2m_min[i]),code:j.daily.weather_code[i],r:j.daily.precipitation_probability_max[i]})),
+      at:Date.now(),stale:false,source:'Open-Meteo'
+    };
+  }
+  return {
+    get now(){ return cur; }, get loading(){ return loading; },
+    desc:c=>(CODES[c]||['Cloudy','☁️'])[0], icon:c=>(CODES[c]||['Cloudy','☁️'])[1],
+    /* one of: rain | hot | fair — drives recommendations */
+    mood(){ const w=cur; if(!w) return 'fair';
+      if(w.rain>=55||[55,63,65,80,81,82,95,96,99].includes(w.code)) return 'rain';
+      if(w.temp>=29) return 'hot'; return 'fair'; },
+    async refresh(force){
+      const loc=Store.here(); const c=Store.s.weatherCache;
+      if(!force && c && Date.now()-c.at<45*60e3 && haversine(c.loc,loc)<25){ cur=c.data; return cur; }
+      loading=true; Views.render();
+      try{
+        cur=await fetchLive(loc);
+        Store.s.weatherCache={loc,data:cur,at:Date.now()}; Store.save();
+      }catch(e){
+        if(c){ cur={...c.data,stale:true,source:'cached '+new Date(c.at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}; }
+        else cur=mock(loc);
+      }
+      loading=false; Views.render(); return cur;
+    }
+  };
+})();
+
+/* ---- Geocoding: Nominatim, throttled and cached, with an offline fallback ---- */
+const Geocode=(()=>{
+  const KEY='rtc.geocache';
+  let cache={}; try{ cache=JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){}
+  const put=(k,v)=>{ cache[k]={v,at:Date.now()};
+    const ks=Object.keys(cache); if(ks.length>400) delete cache[ks[0]];
+    try{ localStorage.setItem(KEY,JSON.stringify(cache)); }catch(e){} };
+  /* Nominatim asks for no more than one request a second. Respect it. */
+  let last=0;
+  const throttle=async()=>{ const w=1100-(Date.now()-last); if(w>0) await new Promise(r=>setTimeout(r,w)); last=Date.now(); };
+  const VIEWBOX='-10.6,36.0,4.2,47.6';   // Iberia and southern France, as a bias not a limit
+  function parseCoords(q){
+    const m=String(q).trim().match(/^(-?\d{1,2}(?:[.,]\d+)?)\s*[,;\s]\s*(-?\d{1,3}(?:[.,]\d+)?)$/);
+    if(!m) return null;
+    const lat=parseFloat(m[1].replace(',','.')), lng=parseFloat(m[2].replace(',','.'));
+    if(!isFinite(lat)||!isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180) return null;
+    return {name:`${lat.toFixed(4)}, ${lng.toFixed(4)}`,detail:'Pasted coordinates',lat,lng,kind:'coordinates',source:'coordinates'};
+  }
+  function offline(q){
+    const t=q.toLowerCase().trim(); if(!t) return [];
+    const inPlaces=allPlaces().filter(p=>p.name.toLowerCase().includes(t))
+      .map(p=>({name:p.name,detail:REGIONS[p.region].name,lat:p.coordinates.lat,lng:p.coordinates.lng,
+        kind:CATS[p.category].n,placeId:p.id,source:'offline'}));
+    const inBases=Store.s.trip.bases.filter(b=>b.name.toLowerCase().includes(t))
+      .map(b=>({name:b.name,detail:'Your base · '+b.arrival,lat:b.coordinates.lat,lng:b.coordinates.lng,
+        kind:'Base',baseId:b.id,source:'offline'}));
+    const inRegions=Object.values(REGIONS).filter(r=>r.name.toLowerCase().includes(t)||r.country.toLowerCase().includes(t))
+      .map(r=>({name:r.name,detail:r.country,lat:r.c.lat,lng:r.c.lng,kind:'Region',source:'offline'}));
+    return [...inPlaces,...inBases,...inRegions].slice(0,8);
+  }
+  return {
+    parseCoords, offline,
+    get cached(){ return Object.keys(cache).length; },
+    async search(q){
+      const c=parseCoords(q); if(c) return [c];
+      const k='s:'+q.toLowerCase().trim();
+      if(cache[k]) return cache[k].v.map(r=>({...r,cached:true}));
+      const local=offline(q);
+      if(!navigator.onLine) return local;
+      try{
+        await throttle();
+        const u=`${Config.search.base}?format=jsonv2&limit=8&addressdetails=1&accept-language=en`+
+          `&viewbox=${VIEWBOX}&q=${encodeURIComponent(q)}`;
+        const r=await fetch(u,{headers:{Accept:'application/json'}});
+        if(!r.ok) throw new Error('geocode '+r.status);
+        const j=await r.json();
+        const out=j.map(x=>({
+          name:(x.name||String(x.display_name).split(',')[0]).trim(),
+          detail:String(x.display_name).split(',').slice(1,4).join(',').trim(),
+          lat:+x.lat, lng:+x.lon, kind:String(x.type||x.category||'place').replace(/_/g,' '),
+          osm:x.osm_type+'/'+x.osm_id, source:'nominatim'}));
+        if(out.length) put(k,out);
+        return out.length?out:local;
+      }catch(e){ return local; }
+    },
+    async reverse(lat,lng){
+      const k=`r:${lat.toFixed(3)},${lng.toFixed(3)}`;
+      if(cache[k]) return cache[k].v;
+      if(!navigator.onLine) return null;
+      try{
+        await throttle();
+        const u=`${Config.search.reverse}?format=jsonv2&zoom=14&accept-language=en&lat=${lat}&lon=${lng}`;
+        const r=await fetch(u,{headers:{Accept:'application/json'}});
+        if(!r.ok) throw new Error('reverse');
+        const j=await r.json(), a=j.address||{};
+        const name=a.village||a.town||a.city||a.suburb||a.municipality||a.county||j.name;
+        if(!name) return null;
+        const out={name,detail:[a.county,a.state,a.country].filter(Boolean).join(', ')};
+        put(k,out); return out;
+      }catch(e){ return null; }
+    }
+  };
+})();
+
+/* ---- Places you add yourself, with real coordinates ---- */
+const Places=(()=>{
+  const SEED={
+    food:{scenic:1,foodValue:3,uniqueness:1,visit:[60,90],cost:22,park:'moderate',dog:'out',tags:'outdoor food'},
+    nature:{scenic:3,foodValue:0,uniqueness:2,visit:[90,150],cost:0,park:'moderate',dog:'leash',tags:'outdoor nature free'},
+    village:{scenic:3,foodValue:2,uniqueness:2,visit:[60,120],cost:8,park:'easy',dog:'out',tags:'outdoor village'},
+    city:{scenic:2,foodValue:3,uniqueness:2,visit:[150,240],cost:20,park:'hard',dog:'out',tags:'outdoor city food'},
+    beach:{scenic:3,foodValue:1,uniqueness:1,visit:[90,180],cost:0,park:'moderate',dog:'leash',tags:'outdoor beach free hot-ok'},
+    hike:{scenic:3,foodValue:0,uniqueness:2,visit:[120,240],cost:0,park:'moderate',dog:'leash',tags:'outdoor nature hike free shade'},
+    view:{scenic:3,foodValue:0,uniqueness:2,visit:[30,60],cost:0,park:'easy',dog:'leash',tags:'outdoor view free'},
+    market:{scenic:1,foodValue:3,uniqueness:2,visit:[45,90],cost:15,park:'moderate',dog:'out',tags:'market food product rain-ok'},
+    castle:{scenic:2,foodValue:0,uniqueness:2,visit:[75,120],cost:10,park:'easy',dog:'out',tags:'outdoor castle history'},
+    motorsport:{scenic:1,foodValue:1,uniqueness:3,visit:[90,180],cost:12,park:'easy',dog:'leash',tags:'motorsport'},
+    product:{scenic:1,foodValue:3,uniqueness:2,visit:[30,60],cost:15,park:'easy',dog:'out',tags:'product food indoor rain-ok'},
+    detour:{scenic:3,foodValue:1,uniqueness:3,visit:[60,120],cost:5,park:'moderate',dog:'leash',tags:'outdoor'},
+  },
+  nearestRegion=ll=>{ let k=null,d=1e9;
+    for(const [key,r] of Object.entries(REGIONS)){ const x=haversine(ll,r.c); if(x<d){d=x;k=key;} } return k; };
+  return {
+    seed:c=>SEED[c]||SEED.detour,
+    nearestRegion,
+    /* d: {name, lat, lng, category, visit, cost, park, dog, why, hours, detail} */
+    create(d){
+      const cat=d.category||'detour', seed=SEED[cat]||SEED.detour;
+      const region=d.region||nearestRegion({lat:d.lat,lng:d.lng});
+      const tags=new Set(seed.tags.split(' '));
+      const cost=d.cost==null?seed.cost:+d.cost;
+      if(cost===0) tags.add('free');
+      if(['in','leash','out'].includes(d.dog||seed.dog)) tags.add('dog');
+      if(!tags.has('indoor')) tags.add('outdoor');
+      const p={
+        id:uid('up'), name:(d.name||'Unnamed place').trim(),
+        coordinates:{lat:+(+d.lat).toFixed(6),lng:+(+d.lng).toFixed(6)},
+        category:cat, region, country:REGIONS[region].country,
+        visitDuration:d.visit||seed.visit, costEstimate:cost,
+        parkingDifficulty:d.park||seed.park, dogStatus:d.dog||seed.dog,
+        crowdLevel:d.crowd||2, scenic:seed.scenic, foodValue:seed.foodValue, uniqueness:seed.uniqueness,
+        bestTime:d.bestTime||'any', why:(d.why||'').trim()||'Your own find. Add a note next time you are here.',
+        tags:[...tags], openingHours:d.hours||null,
+        weatherSuitability:tags.has('indoor')?'rain':(tags.has('shade')?'hot':'fair'),
+        photos:[], address:d.detail||null, source:'user', addedAt:Date.now()
+      };
+      Store.s.userPlaces.unshift(p);
+      if(!Store.isSaved(p.id)) Store.toggleSave(p.id); else Store.save();
+      return p;
+    },
+    update(id,patch){
+      const p=Store.s.userPlaces.find(x=>x.id===id); if(!p) return null;
+      Object.assign(p,patch);
+      if(patch.category){ const sd=SEED[patch.category]||SEED.detour;
+        Object.assign(p,{scenic:sd.scenic,foodValue:sd.foodValue,uniqueness:sd.uniqueness});
+        p.tags=[...new Set([...sd.tags.split(' '),...(p.costEstimate===0?['free']:[])])]; }
+      p.weatherSuitability=p.tags.includes('indoor')?'rain':(p.tags.includes('shade')?'hot':'fair');
+      Store.save(); return p;
+    },
+    remove(id){
+      Store.s.userPlaces=Store.s.userPlaces.filter(p=>p.id!==id);
+      Store.s.saved=Store.s.saved.filter(x=>x.placeId!==id);
+      Store.s.visited=Store.s.visited.filter(x=>x.placeId!==id);
+      Store.s.plans.forEach(pl=>{ pl.stops=pl.stops.filter(st=>st.placeId!==id); });
+      delete Store.s.notes[id]; Store.save();
+    }
+  };
+})();
+
+/* ---- "Worth it?" engine — human advice, deliberately no single score ---- */
+const WorthIt = {
+  eval(place, from){
+    const here=from||Store.here();
+    const km=driveKm(here,place.coordinates), min=driveMin(here,place.coordinates);
+    const p=place, dogOK=['in','leash','out'].includes(p.dogStatus);
+    const vis=p.visitDuration, visTxt=vis[0]>=120?`${(vis[0]/60).toFixed(0)}–${(vis[1]/60).toFixed(0)} hours`:`${vis[0]}–${vis[1]} min`;
+    /* ratio of time spent there vs time spent getting there */
+    const ratio=(vis[0]+vis[1])/2 / Math.max(12,min*2);
+    const quality=p.scenic+p.uniqueness+p.foodValue;   // 0..12
+    const kind = min<=12 ? 'doorstep'
+      : (ratio>=1.1 && quality>=6) ? 'worth'
+      : ratio>=0.7 ? 'ifnearby'
+      : quality>=8 ? 'theday'
+      : min>90 ? 'toofar' : 'onroute';
+    const verdict={
+      doorstep:`Right on your doorstep — go whenever you feel like it.`,
+      worth:`Worth a ${min<45?mins2h(min):Math.round(min/10)*10+' min'} detour on its own.`,
+      ifnearby:`Worth stopping if you are already heading that way.`,
+      theday:`Special enough to justify the ${mins2h(min)} each way — but make it the day, not a stop.`,
+      toofar:`Nice, but probably not worth ${mins2h(min)} of driving for ${visTxt}.`,
+      onroute:`Fine if it is already on your route. Not a reason to make a special trip.`
+    }[kind];
+    /* pairing advice */
+    const near=allPlaces().filter(o=>o.id!==p.id && driveMin(p.coordinates,o.coordinates)<=22)
+      .sort((a,b)=>(b.scenic+b.uniqueness+b.foodValue)-(a.scenic+a.uniqueness+a.foodValue));
+    const pair=near[0]?`Best combined with ${near[0].name}${near[1]?' or '+near[1].name:''}.`:'';
+    const flags=[];
+    if(Store.s.prefs.dogMode && !dogOK) flags.push('Dogs are not allowed here — plan this for a day without the dog.');
+    if(p.parkingDifficulty==='hard') flags.push('Parking is the hard part. Use an edge-of-town car park and walk.');
+    if(p.crowdLevel>=4&&Store.s.prefs.avoidCrowds) flags.push('Very touristy in the middle of the day. Go early or late.');
+    const w=Weather.now, mood=Weather.mood();
+    if(w){
+      if(mood==='rain'&&p.weatherSuitability!=='rain'&&p.tags.includes('outdoor')) flags.push(`Rain likely (${w.rain}%) — this one is better on a dry day.`);
+      if(mood==='hot'&&!p.tags.includes('hot-ok')&&!p.tags.includes('shade')&&p.tags.includes('outdoor')) flags.push('Little shade and hot today. Go before 11:00 or after 18:00 — watch the pavement for paws.');
+      if(mood==='rain'&&p.weatherSuitability==='rain') flags.push('Good rain plan: mostly indoors.');
+    }
+    return {km,min,visTxt,verdict,pair,flags,dogOK,
+      cost:p.costEstimate===0?'Free':`≈ €${p.costEstimate} each`,
+      detourLabel:{doorstep:'On the way',worth:'Worth it',ifnearby:'If nearby',
+        theday:'Make it the day',toofar:'Marginal',onroute:'If on the route'}[kind]};
+  }
+};
+
+/* ---- Day planner ---- */
+const Planner = {
+  themes:{
+    relaxed:{label:'Relaxed',tag:'Option A',w:{food:2,village:2,view:1,beach:2,city:0,hike:-2,nature:1,market:1,castle:0,motorsport:0,product:1,detour:1},maxDrive:55,stops:3,pace:1.25},
+    explore:{label:'Explore',tag:'Option B',w:{food:2,village:2,city:2,market:2,castle:1,view:1,nature:1,product:2,hike:0,beach:1,motorsport:1,detour:2},maxDrive:90,stops:4,pace:1.0},
+    adventure:{label:'Adventure',tag:'Option C',w:{hike:3,nature:3,view:2,beach:1,village:1,food:1,city:-1,market:0,castle:1,motorsport:2,product:0,detour:2},maxDrive:150,stops:4,pace:.9},
+  },
+  score(p,theme,opts){
+    const here=opts.from, min=driveMin(here,p.coordinates);
+    if(min>opts.maxDriveMin) return -1;
+    let s=(theme.w[p.category]??0)*3 + p.scenic + p.uniqueness + p.foodValue*0.8;
+    s -= min/18;                                             // driving is a cost
+    if(Store.s.prefs.likes.some(l=>p.tags.includes(l))) s+=1.5;
+    if(opts.prefs?.length) s += opts.prefs.some(t=>p.tags.includes(t)||p.category===t)?5:-1.5;
+    if(opts.dog && !['in','leash','out'].includes(p.dogStatus)) s-=9;
+    if(opts.dog && (p.tags.includes('dog'))) s+=2;
+    if(Store.s.prefs.avoidCrowds) s-=(p.crowdLevel-2)*0.8;
+    if(Store.visit(p.id)) s-=6;                              // been there already
+    if(Store.isSaved(p.id)) s+=2.5;
+    const mood=opts.mood;
+    if(mood==='rain') s += p.weatherSuitability==='rain'?5:(p.tags.includes('outdoor')?-4:0);
+    if(mood==='hot')  s += (p.tags.includes('shade')||p.tags.includes('hot-ok')||p.category==='beach')?3:-2.5;
+    if(opts.exclude?.includes(p.id)) return -1;
+    return s;
+  },
+  /* Builds a realistic day: drive + visit + lunch, in geographic order */
+  build(themeKey,opts={}){
+    const th=this.themes[themeKey]||this.themes.explore;
+    const o={from:Store.here(),dog:Store.s.prefs.dogMode,mood:Weather.mood(),
+      start:Store.s.prefs.startTime,end:Store.s.prefs.returnTime,
+      maxDriveMin:Math.min(Store.s.prefs.maxDriveMin,Math.round(th.maxDrive*(Weather.mood()==='rain'?1.4:1))),prefs:[],exclude:[],
+      intensity:Store.s.prefs.intensity,...opts};
+    const pace={relaxed:1.3,normal:1,busy:.82}[o.intensity]||1;
+    const want=clamp(th.stops+(o.intensity==='busy'?1:o.intensity==='relaxed'?-1:0),2,6);
+    const pool=allPlaces().map(p=>({p,s:this.score(p,th,o)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s);
+    if(!pool.length) return null;
+    /* pick a spread: best first, then nearest-good to keep driving sane */
+    const chosen=[pool[0].p];
+    while(chosen.length<want){
+      let best=null,bs=-1e9;
+      for(const {p,s} of pool.slice(0,26)){
+        if(chosen.includes(p)) continue;
+        const hop=Math.min(...chosen.map(c=>driveMin(c.coordinates,p.coordinates)));
+        const v=s-hop/9 - (chosen.some(c=>c.category===p.category)?1.5:0);
+        if(v>bs){bs=v;best=p;}
+      }
+      if(!best) break; chosen.push(best);
+    }
+    /* order them as a loop from home */
+    const route=[]; let cur=o.from, rest=[...chosen];
+    while(rest.length){ rest.sort((a,b)=>driveMin(cur,a.coordinates)-driveMin(cur,b.coordinates));
+      const n=rest.shift(); route.push(n); cur=n.coordinates; }
+    /* schedule */
+    const [sh,sm]=o.start.split(':').map(Number); let t=sh*60+sm;
+    const endT=(()=>{const [a,b]=o.end.split(':').map(Number);return a*60+b;})();
+    const stops=[]; let drive=0, walk=0, cost=0, lunchDone=false; cur=o.from;
+    for(const p of route){
+      const dm=driveMin(cur,p.coordinates); drive+=dm; t+=dm;
+      if(!lunchDone && t>=12*60+30 && !p.tags.includes('food')){
+        stops.push({time:hhmm(t),name:'Lunch stop',detail:'Wherever looks good — allow an hour',kind:'lunch',dur:60});
+        t+=60; lunchDone=true;
+      }
+      const dur=clamp(Math.round((p.visitDuration[0]*0.7+p.visitDuration[1]*0.3)*pace/5)*5,25,165);
+      if(t+dur>endT-Math.round(driveMin(p.coordinates,o.from))) break;
+      stops.push({time:hhmm(t),name:p.name,detail:`${CATS[p.category].n} · ${mins2h(dur)}`,placeId:p.id,kind:'place',dur,
+        dog:p.dogStatus,drive:dm});
+      if(p.tags.includes('food')) lunchDone=true;
+      walk += p.category==='hike'?5:(p.category==='city'?3:1.6);
+      cost += p.costEstimate;
+      t+=dur; cur=p.coordinates;
+    }
+    const back=driveMin(cur,o.from); drive+=back; t+=back;
+    stops.push({time:hhmm(t),name:'Back at '+(o.from.name||Store.base()?.name||'base'),detail:mins2h(back)+' drive',kind:'end'});
+    const placeStops=stops.filter(s=>s.kind==='place');
+    const dogWorst=placeStops.reduce((a,s)=>{const r={in:4,leash:4,out:3,unk:2,no:0}[s.dog]??2;return Math.min(a,r);},4);
+    const mood=o.mood;
+    const suit = placeStops.every(s=>{const p=getPlace(s.placeId);
+      return mood==='rain'?p.weatherSuitability==='rain'||!p.tags.includes('outdoor'):true;});
+    return {
+      id:uid('plan'), theme:themeKey, tag:th.tag, date:o.date||todayISO(),
+      title:this.title(themeKey,placeStops),
+      stops, driveMin:drive, durationMin:t-(sh*60+sm), walkKm:Math.round(walk*10)/10,
+      cost:Math.round(cost+ (lunchDone?22:0)),
+      dogRating:['Not suitable','Poor','Okay','Good','Excellent'][dogWorst],
+      weatherFit: mood==='rain'?(suit?'Good rain plan':'Some outdoor time — take a jacket'):mood==='hot'?'Heat-aware timing':'Suits today\u2019s weather',
+      generatedAt:Date.now(), opts:{dog:o.dog,maxDriveMin:o.maxDriveMin,intensity:o.intensity,prefs:o.prefs}
+    };
+  },
+  title(key,stops){
+    const n=stops.map(s=>getPlace(s.placeId)).filter(Boolean);
+    if(!n.length) return 'A day out';
+    const flavour={food:'food',village:'villages',nature:'nature',beach:'coast',city:'old towns',
+      hike:'hills',view:'viewpoints',market:'markets',castle:'history',motorsport:'engines',product:'produce',detour:'detours'};
+    const cats=[...new Set(n.map(p=>p.category))].slice(0,2).map(c=>flavour[c]||c);
+    const hero=(n.slice(1).sort((a,b)=>(b.uniqueness+b.scenic)-(a.uniqueness+a.scenic))[0]||n[0]).name.split(/[—,(]/)[0].trim();
+    const head=cats.join(' & ').replace(/^./,c=>c.toUpperCase());
+    return n.length>1?`${head} via ${hero}`:head;
+  },
+  /* swap a single stop for the next best alternative */
+  replaceStop(plan,idx){
+    const st=plan.stops[idx]; if(st.kind!=='place') return plan;
+    const ex=plan.stops.filter(s=>s.placeId).map(s=>s.placeId);
+    const np=this.build(plan.theme,{...plan.opts,exclude:ex,date:plan.date});
+    if(!np) return plan;
+    const cand=np.stops.find(s=>s.kind==='place'&&!ex.includes(s.placeId));
+    if(!cand) return plan;
+    plan.stops[idx]={...cand,time:st.time};
+    return this.reschedule(plan);
+  },
+  reschedule(plan){
+    let t=(()=>{const [a,b]=plan.stops[0].time.split(':').map(Number);return a*60+b;})();
+    let cur=Store.here(), drive=0;
+    for(const s of plan.stops){
+      if(s.kind==='end'){ const d=driveMin(cur,Store.here()); drive+=d; t+=d; s.time=hhmm(t); s.detail=mins2h(d)+' drive'; continue; }
+      const p=s.placeId?getPlace(s.placeId):null;
+      if(p){ const d=driveMin(cur,p.coordinates); drive+=d; t+=d; cur=p.coordinates; }
+      s.time=hhmm(t); t+=s.dur||45;
+    }
+    plan.driveMin=drive; return plan;
+  },
+  /* nudges from the Home buttons */
+  nudge(plan,kind){
+    const o={...plan.opts,date:plan.date};
+    if(kind==='less-driving') o.maxDriveMin=Math.max(25,Math.round((o.maxDriveMin||90)*0.55));
+    if(kind==='food') o.prefs=['food','market','product'];
+    if(kind==='nature') o.prefs=['nature','hike','view'];
+    if(kind==='towns') o.prefs=['village','city'];
+    if(kind==='relax'){ o.intensity='relaxed'; o.maxDriveMin=45; }
+    return this.build(kind==='relax'?'relaxed':plan.theme,o)||plan;
+  }
+};
+
+/* ---- Today: tracks the day you started, and re-times what is left ----
+   A plan stops being a suggestion the moment you leave. From then on the
+   question is "what next, and are we still going to make it back?" */
+const Today=(()=>{
+  const st=()=>Store.s.activeDay;
+  function plan(){
+    const a=st(); if(!a) return null;
+    const p=Store.s.plans.find(x=>x.id===a.planId);
+    if(!p){ Store.s.activeDay=null; Store.save(); return null; }
+    return p;
+  }
+  const nowMin=()=>{ const d=new Date(); return d.getHours()*60+d.getMinutes(); };
+  const toMin=hm=>{ const [a,b]=String(hm||'0:00').split(':').map(Number); return a*60+b; };
+
+  /* Re-time everything still to come, from this minute and this position. */
+  function retime(){
+    const a=st(), p=plan(); if(!p) return null;
+    a.idx=clamp(a.idx,0,p.stops.length-1);
+    let t=nowMin();
+    let cur = Geo.live ? {lat:Geo.live.lat,lng:Geo.live.lng} : lastPosition(p,a);
+    const home=Store.here();
+    for(let i=a.idx;i<p.stops.length;i++){
+      const s=p.stops[i], pl=s.placeId?getPlace(s.placeId):null;
+      if(s.kind==='end'){ const d=driveMin(cur,home); s.legMin=d; t+=d; s.eta=hhmm(t); break; }
+      if(pl){
+        const d=(i===a.idx&&a.at)?0:driveMin(cur,pl.coordinates);
+        s.legMin=d; t+=d; s.eta=hhmm(t); cur=pl.coordinates;
+      } else { s.legMin=0; s.eta=hhmm(t); }
+      t+=(i===a.idx&&a.at)?Math.max(5,(s.dur||45)-elapsedHere()):(s.dur||45);
+    }
+    Store.save(); return p;
+  }
+  function elapsedHere(){ const a=st(); return a&&a.arrivedAt?Math.min(240,Math.round((Date.now()-a.arrivedAt)/60000)):0; }
+  function lastPosition(p,a){
+    for(let i=a.idx-1;i>=0;i--){ const pl=p.stops[i].placeId?getPlace(p.stops[i].placeId):null;
+      if(pl&&a.state[i]==='done') return pl.coordinates; }
+    return Store.here();
+  }
+  return {
+    get active(){ const p=plan(); return p?{a:st(),plan:p}:null; },
+    isToday(){ const a=st(); return !!a&&a.date===todayISO(); },
+    isFuture(){ const a=st(); return !!a&&a.date>todayISO(); },
+    retime, elapsedHere,
+    start(p){
+      Store.s.activeDay={planId:p.id,date:p.date||todayISO(),startedAt:Date.now(),idx:0,at:false,state:{},arrivedAt:null};
+      p.started=true; Store.savePlan(p); retime(); return Store.s.activeDay;
+    },
+    stop(){ const p=plan(); const a=st(); return p?p.stops[clamp(a.idx,0,p.stops.length-1)]:null; },
+    arrive(){ const a=st(); if(!a) return; a.at=true; a.arrivedAt=Date.now(); retime(); },
+    done(){
+      const a=st(), p=plan(); if(!p) return;
+      const s=p.stops[a.idx];
+      a.state[a.idx]='done';
+      if(s&&s.placeId) Store.markVisited(s.placeId,'good');
+      a.idx=clamp(a.idx+1,0,p.stops.length-1); a.at=false; a.arrivedAt=null;
+      retime();
+      return s;
+    },
+    skip(){ const a=st(), p=plan(); if(!p) return;
+      a.state[a.idx]='skipped'; a.idx=clamp(a.idx+1,0,p.stops.length-1); a.at=false; a.arrivedAt=null; retime(); },
+    linger(m){ const a=st(), p=plan(); if(!p) return; const s=p.stops[a.idx];
+      if(s) s.dur=(s.dur||45)+m; retime(); },
+    dropLast(){ const p=plan(), a=st(); if(!p) return;
+      for(let i=p.stops.length-1;i>a.idx;i--){ if(p.stops[i].placeId){ p.stops.splice(i,1); break; } }
+      retime(); },
+    /* how the day is running against the plan you set out with */
+    status(){
+      const p=retime(), a=st(); if(!p) return null;
+      const end=p.stops[p.stops.length-1];
+      const etaMin=toMin(end.eta||end.time), plannedMin=toMin(Store.s.prefs.returnTime);
+      const diff=etaMin-plannedMin;
+      const placeStops=p.stops.filter(s=>s.placeId);
+      const done=Object.entries(a.state).filter(([i,v])=>v==='done'&&p.stops[i]&&p.stops[i].placeId).length;
+      const skipped=Object.values(a.state).filter(v=>v==='skipped').length;
+      return {etaHome:end.eta||end.time, diff, done, skipped, total:placeStops.length,
+        late:diff>20, early:diff<-45,
+        remaining:p.stops.slice(a.idx+1).filter(s=>s.placeId)};
+    },
+    finish(){
+      const p=plan(), a=st(); if(!p){ Store.s.activeDay=null; Store.save(); return null; }
+      const stt=this.status();
+      const entry={id:uid('day'),date:a.date,planId:p.id,title:p.title,
+        done:stt.done,skipped:stt.skipped,driveMin:p.driveMin,
+        places:Object.entries(a.state).filter(([i,v])=>v==='done').map(([i])=>p.stops[i]&&p.stops[i].placeId).filter(Boolean),
+        startedAt:a.startedAt,endedAt:Date.now()};
+      Store.s.dayLog.unshift(entry); Store.s.dayLog=Store.s.dayLog.slice(0,60);
+      Store.s.activeDay=null; Store.save(); return entry;
+    },
+    cancel(){ Store.s.activeDay=null; Store.save(); }
+  };
+})();
+
+/* ---- AI abstraction: local rule engine now, provider slot for later ---- */
+const AI = {
+  get provider(){ return Config.keyFor('ai')?Config.ai.provider:'local'; },
+  context(){
+    const h=Store.here(), w=Weather.now, b=Store.base();
+    return {location:h.name,coords:[h.lat.toFixed(3),h.lng.toFixed(3)],time:new Date().toTimeString().slice(0,5),
+      weather:w?`${w.temp}°C, ${Weather.desc(w.code)}, rain ${w.rain}%`:'unknown',
+      base:b?.name,nextBase:Store.nextBase()?.name,dogMode:Store.s.prefs.dogMode,
+      visited:Store.s.visited.map(v=>getPlace(v.placeId)?.name).filter(Boolean),
+      saved:Store.s.saved.map(v=>getPlace(v.placeId)?.name).filter(Boolean),
+      likes:Store.s.prefs.likes,maxDriveMin:Store.s.prefs.maxDriveMin};
+  },
+  async ask(q){
+    if(this.provider!=='local'){ try{ return await this.remote(q); }catch(e){ /* fall through */ } }
+    return this.local(q);
+  },
+  async remote(q){
+    const r=await fetch(Config.ai.base,{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({model:Config.ai.model,context:this.context(),question:q})});
+    if(!r.ok) throw new Error('ai'); const j=await r.json(); return j.answer;
+  },
+  local(q){
+    const t=q.toLowerCase(), mood=Weather.mood(), dog=Store.s.prefs.dogMode;
+    const pick=(prefs,max)=>Planner.build('explore',{prefs,maxDriveMin:max||Store.s.prefs.maxDriveMin});
+    let intent='day';
+    if(/eat|food|lunch|dinner|hungry|pintxo/.test(t)) intent='food';
+    else if(/view|sunset|photo/.test(t)) intent='view';
+    else if(/dog|paws/.test(t)) intent='dog';
+    else if(/event|festival|market|today.*on/.test(t)) intent='event';
+    else if(/park|car/.test(t)) intent='parking';
+    else if(/rain|wet|weather/.test(t)) intent='weather';
+    const lines=[];
+    if(intent==='parking'){
+      const pk=Store.s.parking;
+      lines.push(pk?`Your car is at ${pk.note||'the saved spot'}, parked ${new Date(pk.at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}${pk.expires?`, paid until ${pk.expires}`:''}. It is ${Math.round(haversine(Store.here(),pk.coordinates)*1000)} m away.`:`No parking saved. Tap “Where did we park?” when you next leave the car.`);
+    } else if(intent==='event'){
+      const evs=Events.near(50,'week');
+      lines.push(evs.length?`${evs.length} things on within 50 km this week. Closest today: ${evs[0].name} — ${evs[0].why}`:'Nothing in the radar within 50 km this week.');
+    } else if(intent==='weather'){
+      const w=Weather.now;
+      lines.push(w?`${w.temp}°C, ${Weather.desc(w.code).toLowerCase()}, ${w.rain}% chance of rain, wind ${w.wind} km/h.`:'No weather data yet.');
+      lines.push(mood==='rain'?'Rain plan: market halls, old towns with arcades, a museum, and a long lunch.':mood==='hot'?'Heat plan: coast or shaded valleys in the morning, a village and a terrace after 18:00.':'Good conditions — spend it outdoors.');
+    } else {
+      const prefs={food:['food','market','product'],view:['view'],dog:['dog'],day:[]}[intent];
+      const plan=pick(prefs);
+      if(plan){
+        lines.push(`${plan.title}. ${plan.stops.filter(s=>s.kind==='place').length} stops, ${mins2h(plan.driveMin)} driving, dog ${plan.dogRating.toLowerCase()}.`);
+        plan.stops.filter(s=>s.kind==='place').forEach(s=>{
+          const p=getPlace(s.placeId); lines.push(`${s.time} · ${p.name} — ${p.why.split('.')[0]}.`);
+        });
+        Store.savePlan(plan);
+      } else lines.push('Nothing matches those constraints. Try raising the maximum driving time.');
+    }
+    if(dog&&intent!=='parking') lines.push('Dog Mode is on, so anything that bans dogs has been left out.');
+    return lines.join('\n');
+  }
+};
+
+/* ---- Events radar ---- */
+const Events = {
+  near(radiusKm,when){
+    const h=Store.here(), t=todayISO(), d1=(()=>{const d=new Date();d.setDate(d.getDate()+1);return todayISO(d);})();
+    const wk=(()=>{const d=new Date();d.setDate(d.getDate()+7);return todayISO(d);})();
+    return EVENTS.map(e=>({...e,km:driveKm(h,e.coordinates),min:driveMin(h,e.coordinates)}))
+      .filter(e=>e.km<=radiusKm)
+      .filter(e=>when==='today'?e.date===t:when==='tomorrow'?e.date===d1:(e.date>=t&&e.date<=wk))
+      .filter(e=>!Store.s.prefs.dogMode||e.dogFriendly||when!=='today')
+      .sort((a,b)=>a.date===b.date?a.km-b.km:a.date<b.date?-1:1);
+  },
+  kindEmoji:k=>({festival:'🎉',food:'🍽️',market:'🧺',concert:'🎶',motorsport:'🏁',culture:'🖼️'}[k]||'📍')
+};
+
+/* ---- Filters ---- */
+const FILTERS=[
+  {id:'dog',label:'🐕 Dog friendly',fn:p=>['in','leash','out'].includes(p.dogStatus)},
+  {id:'free',label:'Free',fn:p=>p.costEstimate===0},
+  {id:'u20',label:'Under €20',fn:p=>p.costEstimate<20},
+  {id:'u30',label:'Under 30 min',fn:p=>driveMin(Store.here(),p.coordinates)<=30},
+  {id:'u60',label:'Under 1 hour',fn:p=>driveMin(Store.here(),p.coordinates)<=60},
+  {id:'indoor',label:'Indoor',fn:p=>p.tags.includes('indoor')},
+  {id:'outdoor',label:'Outdoor',fn:p=>p.tags.includes('outdoor')},
+  {id:'rain',label:'Rain friendly',fn:p=>p.weatherSuitability==='rain'||p.tags.includes('rain-ok')},
+  {id:'hot',label:'Hot weather',fn:p=>p.tags.includes('hot-ok')||p.tags.includes('shade')},
+  {id:'quiet',label:'Not touristy',fn:p=>p.crowdLevel<=2},
+];
+function applyFilters(list,active){
+  let out=list;
+  for(const id of active){ const f=FILTERS.find(x=>x.id===id); if(f) out=out.filter(f.fn); }
+  return out;
+}
+
+/* =====================================================================
+   4. UI HELPERS
+   ===================================================================== */
+const GRAD={detour:['#8a6520','#e5a83b'],food:['#7a3320','#c4613f'],nature:['#1f4a3a','#5c9c84'],
+  village:['#4a3a28','#a88257'],city:['#2b3440','#6e97c9'],beach:['#1d4550','#58a0ad'],
+  hike:['#27412a','#6f9c55'],view:['#33304f','#7a76b8'],market:['#53401c','#c79a3c'],
+  castle:['#3a3733','#8c857a'],motorsport:['#4a1d1d','#b0483f'],product:['#4f4318','#c3ac45']};
+const UI={
+  grad(cat,seed='x'){ const g=GRAD[cat]||GRAD.detour; const a=((seed&&seed.charCodeAt(0))||60)%40;
+    return `background:linear-gradient(${120+a}deg,${g[0]},${g[1]})`; },
+  dogPill(d){ const x=DOG[d]||DOG.unk; return `<span class="pill ${x.t}">🐕 ${x.l}</span>`; },
+  parkPill(p){ const x=PARK[p]||PARK.easy; return `<span class="pill ${x.t}">🅿️ ${x.l}</span>`; },
+  thumb(p,h='',cap=false){
+    const em=CATS[p.category].e;
+    return `<div class="thumb" style="${h}"><div class="gl" style="${UI.grad(p.category,p.id)}"></div>
+      <span class="em">${em}</span>${cap?`<span class="cap">${esc(p.name)}</span>`:''}
+      ${Store.isSaved(p.id)?'<span class="badge pill warn">Saved</span>':''}</div>`;
+  },
+  placeCardV(p){
+    const w=WorthIt.eval(p);
+    return `<button class="card pad0" data-place="${p.id}" style="text-align:left">
+      ${UI.thumb(p,'aspect-ratio:16/9',true)}
+      <div style="padding:11px 12px">
+        <div class="row sm t2" style="gap:8px"><span>${mins2h(w.min)} away</span><span class="mut">·</span><span>${w.visTxt}</span></div>
+        <div class="row wrap" style="gap:6px;margin-top:8px">
+          <span class="pill ${['Worth it','On the way'].includes(w.detourLabel)?'good':w.detourLabel==='Marginal'?'bad':'warn'}">${w.detourLabel}</span>
+          ${UI.dogPill(p.dogStatus)}
+        </div>
+      </div></button>`;
+  },
+  placeRow(p){
+    const w=WorthIt.eval(p), v=Store.visit(p.id);
+    return `<button class="hcard" data-place="${p.id}">
+      <div class="th"><div class="gl" style="${UI.grad(p.category,p.id)}"></div><span class="em" style="position:relative">${CATS[p.category].e}</span></div>
+      <div class="bd">
+        <div class="between"><h3 class="ell">${esc(p.name)}</h3>${v?`<span class="pill good">${esc(v.rating==='loved'?'Loved it':v.rating==='skip'?'Would skip':'Visited')}</span>`:''}</div>
+        <div class="sm mut ell">${REGIONS[p.region].flag} ${esc(REGIONS[p.region].name)} · ${CATS[p.category].n}${p.source==='user'?' · yours':''}</div>
+        <div class="row wrap" style="gap:5px;margin-top:7px">
+          <span class="pill">${mins2h(w.min)}</span>
+          <span class="pill ${['Worth it','On the way'].includes(w.detourLabel)?'good':w.detourLabel==='Marginal'?'bad':''}">${w.detourLabel}</span>
+          ${UI.dogPill(p.dogStatus)}
+        </div>
+      </div></button>`;
+  },
+  planCard(plan,i){
+    const stops=plan.stops.filter(s=>s.kind==='place');
+    return `<div class="plan" data-plan="${plan.id}">
+      <div class="tag">${plan.tag} · ${Planner.themes[plan.theme].label}</div>
+      <h2>${esc(plan.title)}</h2>
+      <div class="facts">
+        <span class="pill">${stops.length} stops</span>
+        <span class="pill">🚗 ${mins2h(plan.driveMin)}</span>
+        <span class="pill">${mins2h(plan.durationMin)} out</span>
+        <span class="pill">🚶 ${plan.walkKm} km</span>
+        <span class="pill">≈ €${plan.cost}</span>
+        <span class="pill ${plan.dogRating==='Excellent'||plan.dogRating==='Good'?'good':plan.dogRating==='Okay'?'warn':'bad'}">🐕 ${plan.dogRating}</span>
+        <span class="pill ${plan.weatherFit.startsWith('Good')||plan.weatherFit.startsWith('Suits')?'good':'warn'}">${esc(plan.weatherFit)}</span>
+      </div>
+      <div class="tl">${plan.stops.map((s,idx)=>`
+        <div class="stop">
+          <span class="t">${s.time}</span>
+          <span class="n">${esc(s.name)}${s.kind==='place'?'':''}</span>
+          ${s.kind==='place'?`<button class="pill" data-swap="${plan.id}:${idx}">swap</button>`:''}
+        </div>
+        <div class="d" style="grid-column:2/4;margin:-7px 0 0">${esc(s.detail||'')}</div>`).join('')}</div>
+      <div class="row wrap" style="gap:8px;margin-top:14px">
+        <button class="btn primary sm" data-startday="${plan.id}">Start this day</button>
+        <button class="btn sm" data-planroute="${plan.id}">View on map</button>
+      </div>
+      <div class="row wrap" style="gap:6px;margin-top:8px">
+        ${[['less-driving','Less driving'],['food','More food'],['nature','More nature'],['towns','More towns'],['relax','More relaxing']]
+          .map(([k,l])=>`<button class="pill" data-nudge="${plan.id}:${k}">${l}</button>`).join('')}
+      </div></div>`;
+  },
+  scorecard(p,w){
+    const rows=[['Detour',w.detourLabel],['Drive',`${mins2h(w.min)} · ${w.km} km`],['Visit',w.visTxt],['Cost',w.cost],
+      ['Parking',(PARK[p.parkingDifficulty]||{}).l],['Dogs',(DOG[p.dogStatus]||{}).l],
+      ['Crowds',CROWD[p.crowdLevel]],['Best time',{morning:'Morning',evening:'Late afternoon',lunch:'Lunchtime',any:'Any time'}[p.bestTime]]];
+    return `<div class="score">${rows.map(([k,v])=>`<div><div class="k">${k}</div><div class="v">${esc(v||'—')}</div></div>`).join('')}</div>`;
+  },
+  /* The live day: what is happening now, what is next, will we make it back */
+  todayStrip(){
+    const act=Today.active; if(!act) return '';
+    const {a,plan}=act;
+    if(Today.isFuture()) return `
+      <div class="card" style="border-color:var(--gold)">
+        <div class="between"><div class="tag" style="font-family:var(--display);color:var(--gold);font-size:11.5px;font-weight:700;letter-spacing:.06em">READY FOR ${new Date(a.date).toLocaleDateString([], {weekday:'long'}).toUpperCase()}</div></div>
+        <h2 style="margin:3px 0 8px">${esc(plan.title)}</h2>
+        <div class="sm t2">${plan.stops.filter(x=>x.placeId).length} stops · ${mins2h(plan.driveMin)} driving · first stop ${plan.stops[0].time}</div>
+        <div class="row" style="gap:8px;margin-top:12px">
+          <button class="btn primary sm" data-tdstart>Start it now</button>
+          <button class="btn sm" data-plan="${plan.id}">Look at it</button>
+          <button class="btn sm ghost" data-tdcancel>Forget it</button></div></div>`;
+    if(!Today.isToday()) return '';
+    Today.retime();
+    const s=Today.stop(), st=Today.status();
+    const pl=s&&s.placeId?getPlace(s.placeId):null;
+    const pct=st.total?Math.round(st.done/st.total*100):0;
+    const dist=(Geo.live&&pl)?haversine({lat:Geo.live.lat,lng:Geo.live.lng},pl.coordinates):null;
+    const leaveBy=(()=>{ if(!a.at||!s) return null;
+      const left=Math.max(0,(s.dur||45)-Today.elapsedHere());
+      const d=new Date(Date.now()+left*60000); return pad(d.getHours())+':'+pad(d.getMinutes()); })();
+    const next=plan.stops.slice(a.idx+1).filter(x=>x.placeId||x.kind==='end').slice(0,3);
+
+    let head, sub, actions;
+    if(s&&s.kind==='end'){
+      head=`Head back to ${esc(Store.here().name)}`;
+      sub=`${mins2h(s.legMin||0)} drive · home about ${s.eta||s.time}`;
+      actions=`<button class="btn primary grow" data-tdend>Finish the day</button>`;
+    } else if(a.at){
+      head=`At ${esc(s.name)}`;
+      sub=`${Today.elapsedHere()} min here${leaveBy?` · leave by ${leaveBy} to stay on plan`:''}`;
+      actions=`<button class="btn primary grow" data-tddone>Done here</button>
+        <button class="btn" data-tdlinger="30">+30 min</button>`;
+    } else {
+      head=`Driving to ${esc(s.name)}`;
+      sub=`${mins2h(s.legMin||0)}${pl?` · ${driveKm(Store.here(),pl.coordinates)} km`:''} · arrive about ${s.eta||s.time}${dist!=null?` · ${dist<1?Math.round(dist*1000)+' m':dist.toFixed(1)+' km'} away`:''}`;
+      actions=`<button class="btn primary grow" data-tdarrive>We are here</button>
+        <button class="btn" data-tdskip>Skip</button>`;
+    }
+    return `
+    <div class="card" style="border-color:var(--gold);padding:15px">
+      <div class="between">
+        <div style="font-family:var(--display);font-size:11.5px;font-weight:700;letter-spacing:.06em;color:var(--gold)">RIGHT NOW</div>
+        <div class="sm mut">${st.done} of ${st.total} done${st.skipped?` · ${st.skipped} skipped`:''}</div>
+      </div>
+      <div class="bar" style="margin:8px 0 12px"><i style="width:${clamp(pct,3,100)}%"></i></div>
+      <h2>${head}</h2>
+      <div class="sm t2" style="margin-top:5px">${sub}</div>
+      ${pl?`<div class="sm mut" style="margin-top:6px">${esc(pl.why.split('.')[0])}.</div>`:''}
+      <div class="row" style="gap:8px;margin-top:13px">${actions}</div>
+      ${next.length?`<div class="tl" style="margin-top:15px">${next.map(x=>`
+        <div class="stop"><span class="t">${x.eta||x.time}</span><span class="n">${esc(x.name)}</span>
+        ${x.placeId?`<button class="pill" data-place="${x.placeId}">open</button>`:''}</div>`).join('')}</div>`:''}
+      <div class="${st.late?'banner':'sm mut'}" style="margin-top:13px">
+        ${st.late
+          ? `Back about ${st.etaHome}, ${mins2h(st.diff)} later than you wanted.${st.remaining.length?' Dropping a stop would fix it.':''}
+             ${st.remaining.length?`<button class="btn sm" data-tddrop>Drop the last stop</button>`:''}`
+          : `Back about ${st.etaHome}${st.diff<-30?', comfortably early — there is room for one more stop':''}.`}
+      </div>
+      <div class="row wrap" style="gap:6px;margin-top:10px">
+        <button class="pill" data-planroute="${plan.id}">Show on map</button>
+        <button class="pill" data-plan="${plan.id}">Whole day</button>
+        <button class="pill" data-tdend>End the day</button>
+      </div>
+    </div>`;
+  },
+  weatherStrip(){
+    const w=Weather.now;
+    if(!w) return `<div class="sm mut">${Weather.loading?'Checking the sky…':'Weather unavailable'}</div>`;
+    return `<div class="row sm" style="gap:8px">
+      <span style="font-size:19px">${Weather.icon(w.code)}</span>
+      <strong style="font-family:var(--display);font-size:17px">${w.temp}°</strong>
+      <span class="t2">${esc(Weather.desc(w.code))}</span>
+      <span class="mut">·</span><span class="t2">${w.rain}% rain</span>
+      ${w.stale?'<span class="pill warn">'+esc(w.source)+'</span>':''}</div>`;
+  }
+};
+const ICONS={
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>',
+  explore:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13 13l-4.5 2.5L11 11z"/></svg>',
+  map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M9 3 3 5.5v15L9 18l6 3 6-2.5v-15L15 6z"/><path d="M9 3v15M15 6v15"/></svg>',
+  trip:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 4v16M17 4v16"/><circle cx="7" cy="8" r="2"/><circle cx="17" cy="16" r="2"/><path d="M9 8h4a4 4 0 0 1 0 8H9"/></svg>',
+  saved:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg>',
+  dog:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 4.5c1.2 0 2 1.3 2 3s-.8 3-2 3-2-1.3-2-3 .8-3 2-3zm15 0c1.2 0 2 1.3 2 3s-.8 3-2 3-2-1.3-2-3 .8-3 2-3zM8.5 9c1.2 0 2 1.3 2 3s-.8 3-2 3-2-1.3-2-3 .8-3 2-3zm7 0c1.2 0 2 1.3 2 3s-.8 3-2 3-2-1.3-2-3 .8-3 2-3zM12 14c3 0 5.5 2.2 5.5 4.3 0 1.4-1.2 2.2-2.7 1.7-.9-.3-1.8-.5-2.8-.5s-1.9.2-2.8.5c-1.5.5-2.7-.3-2.7-1.7C6.5 16.2 9 14 12 14z"/></svg>',
+  cog:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M3.9 7.2l2.6 1.5M17.5 15.3l2.6 1.5M3.9 16.8l2.6-1.5M17.5 8.7l2.6-1.5"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 22s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  spark:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.9 5.6 5.6 1.9-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.9z"/><path d="M18.5 15l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"/></svg>',
+};
+
+/* =====================================================================
+   5. VIEWS
+   ===================================================================== */
+const Views={
+  tab:'home', exploreCat:'detour', exploreFilters:new Set(), savedTab:'saved', showOptions:false,
+  eventRadius:50, eventWhen:'week', plans:[],
+
+  render(){
+    const v=$('#view'); if(!v) return;
+    $('#topbar').innerHTML=this.topbar();
+    document.body.classList.toggle('mapmode',this.tab==='map');
+    $('#mapwrap') && ($('#mapwrap').style.display = this.tab==='map'?'block':'none');
+    v.style.display = this.tab==='map'?'none':'block';
+    if(this.tab!=='map') v.innerHTML=this[this.tab]?.()||'';
+    if(this.tab==='map') MapView.mount();
+    this.nav();
+  },
+  nav(){
+    $('#nav').innerHTML=[['home','Home'],['explore','Explore'],['map','Map'],['trip','Trip'],['saved','Saved']]
+      .map(([k,l])=>`<button data-tab="${k}" class="${this.tab===k?'on':''}">${ICONS[k]}<span>${l}</span></button>`).join('');
+  },
+  topbar(){
+    const dog=Store.s.prefs.dogMode;
+    return `<div class="between">
+      <div class="row grow" style="min-width:0">
+        <div class="brandmark">${ICONS.pin}</div>
+        <div class="grow" style="min-width:0">
+          <div class="ell" style="font-family:var(--display);font-weight:700;font-size:15px">${esc(Store.here().name)}</div>
+          <div class="xs mut ell">${Geo.status==='ok'?'Live position':Store.s.manualLocation?'Set manually':'Holiday base'}${Shell.offline?' · offline':''}</div>
+        </div>
+      </div>
+      <button class="iconbtn ${dog?'on':''}" data-dogmode aria-label="Dog mode">${ICONS.dog}</button>
+      <button class="iconbtn" data-sheet="settings" aria-label="Settings">${ICONS.cog}</button>
+    </div>`;
+  },
+
+  /* ---------------- HOME ---------------- */
+  home(){
+    const h=new Date().getHours();
+    const greet=h<12?'Good morning':h<18?'Good afternoon':'Good evening';
+    const w=Weather.now, here=Store.here(), base=Store.base(), next=Store.nextBase();
+    if(!this.plans.length) this.regenPlans();
+    const evs=Events.near(this.eventRadius,'today').slice(0,4);
+    const region=Store.region();
+    const foods=FOODS.filter(f=>f.region===region).slice(0,6);
+    const nearby=allPlaces().map(p=>({p,m:driveMin(here,p.coordinates)}))
+      .filter(x=>x.m<=75 && !Store.visit(x.p.id))
+      .filter(x=>!Store.s.prefs.dogMode||['in','leash','out'].includes(x.p.dogStatus))
+      .sort((a,b)=>(b.p.scenic+b.p.uniqueness+b.p.foodValue-b.m/22)-(a.p.scenic+a.p.uniqueness+a.p.foodValue-a.m/22))
+      .slice(0,8).map(x=>x.p);
+    const recent=Store.s.visited.slice(0,5).map(v=>getPlace(v.placeId)).filter(Boolean);
+    const dogPlaces=allPlaces().map(p=>({p,m:driveMin(here,p.coordinates)}))
+      .filter(x=>x.m<=60&&(x.p.dogStatus==='in'||x.p.dogStatus==='leash'||x.p.tags.includes('dog')))
+      .sort((a,b)=>a.m-b.m).slice(0,6).map(x=>x.p);
+
+    return `
+    ${Shell.offline?`<div class="banner" style="margin-bottom:12px">📡 Offline. Showing saved trip data${w&&w.stale?' and the last weather reading':''}.</div>`:''}
+    <div style="margin:2px 0 4px">
+      <h1>${greet}</h1>
+      <div class="between" style="margin-top:6px">
+        ${UI.weatherStrip()}
+        <button class="pill" data-sheet="weather">Forecast</button>
+      </div>
+    </div>
+
+    ${Geo.status!=='ok'&&!Store.s.manualLocation?`
+      <div class="banner" style="margin-top:12px">
+        <div class="grow">${Geo.status==='denied'?'Location is off — using your base in '+esc(base.name)+'.':'Use your real position for distances?'}</div>
+        <button class="btn sm" data-geo>${Geo.status==='denied'?'Change base':'Use GPS'}</button>
+      </div>`:''}
+
+    ${Today.active?`<div class="sect">${UI.todayStrip()}</div>`:''}
+
+    <div class="sect">
+      <h2>${Today.active&&Today.isToday()?'Something else instead?':'What shall we do today?'}</h2>
+      <div class="sm mut" style="margin:4px 0 12px">Built for ${esc(here.name)}, ${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}, ${Weather.mood()==='rain'?'wet weather':Weather.mood()==='hot'?'heat':'good weather'}${Store.s.prefs.dogMode?', dog with us':''}.</div>
+      <div class="stack" style="gap:12px">${
+        (Today.active&&Today.isToday()&&!this.showOptions)
+          ? `<button class="btn block" data-showopts>Show three other options</button>`
+          : this.plans.map((p,i)=>UI.planCard(p,i)).join('')}</div>
+      <div class="row" style="gap:8px;margin-top:12px">
+        <button class="btn block" data-sheet="planner">Plan a different day</button>
+        <button class="iconbtn" data-regen aria-label="Regenerate">${ICONS.spark}</button>
+      </div>
+    </div>
+
+    <div class="sect">
+      <h2>Quick actions</h2>
+      <div class="qgrid" style="margin-top:10px">
+        ${[['ask','🧭','What should we do?'],['food','🍽️','Find food'],['view','👁️','Find a viewpoint'],
+           ['dog','🐕','Dog-friendly place'],['events','🎉','Nearby event'],['parking','🅿️','Where did we park?'],
+           ['savehere','📍','Save this place'],['tomorrow','📅','Plan tomorrow']]
+          .map(([k,i,l])=>`<button class="qa" data-quick="${k}"><span class="i">${i}</span>${l}</button>`).join('')}
+      </div>
+    </div>
+
+    <div class="sect">
+      <div class="between"><h2>Near you</h2><button class="link" data-tab="explore">All places</button></div>
+      <div class="hscroll">${nearby.map(p=>UI.placeCardV(p)).join('')||'<div class="mut sm">Nothing within 75 minutes.</div>'}</div>
+    </div>
+
+    ${Store.s.prefs.dogMode?`<div class="sect">
+      <div class="between"><h2>Good with the dog</h2></div>
+      <div class="stack">${dogPlaces.map(p=>UI.placeRow(p)).join('')}</div>
+    </div>`:''}
+
+    <div class="sect">
+      <div class="between"><h2>Happening today</h2><button class="link" data-sheet="events">Events radar</button></div>
+      <div class="stack">${evs.length?evs.map(e=>`
+        <button class="card" data-event="${e.id}" style="text-align:left">
+          <div class="between"><h3>${Events.kindEmoji(e.kind)} ${esc(e.name)}</h3><span class="pill">${e.km} km</span></div>
+          <div class="sm t2" style="margin-top:6px">${esc(e.why)}</div>
+          <div class="row" style="gap:6px;margin-top:8px"><span class="pill">${e.time}</span><span class="pill">${esc(e.cost)}</span>${e.dogFriendly?'<span class="pill good">🐕 fine</span>':'<span class="pill bad">🐕 no</span>'}</div>
+        </button>`).join(''):'<div class="card mut sm">Nothing on within '+this.eventRadius+' km today. Try tomorrow or widen the radius.</div>'}</div>
+    </div>
+
+    <div class="sect">
+      <div class="between"><h2>Worth tasting here</h2><button class="link" data-sheet="food">Food hunter</button></div>
+      <div class="hscroll">${foods.map(f=>`
+        <button class="card" data-food="${f.id}" style="text-align:left;width:190px">
+          <div style="font-size:24px">${f.emoji}</div>
+          <h3 style="margin-top:6px">${esc(f.name)}</h3>
+          <div class="sm mut" style="margin-top:4px">${esc(f.priceRange)}</div>
+          <div class="sm t2" style="margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(f.what)}</div>
+        </button>`).join('')}</div>
+    </div>
+
+    <div class="sect">
+      <h2>Next stop</h2>
+      ${next?`<button class="card" data-sheet="trip" style="text-align:left;width:100%;margin-top:10px">
+        <div class="between"><h3>${REGIONS[next.region].flag} ${esc(next.name)}</h3><span class="pill">${driveMin(base.coordinates,next.coordinates)>0?mins2h(driveMin(base.coordinates,next.coordinates)):'—'} drive</span></div>
+        <div class="sm mut" style="margin-top:6px">${esc(next.accommodation||'')} · from ${esc(next.arrival)}</div>
+        <div class="sm t2" style="margin-top:6px">${driveKm(base.coordinates,next.coordinates)} km from ${esc(base.name)}</div>
+      </button>`:'<div class="card mut sm">Last base of the trip. Add another in Trip.</div>'}
+    </div>
+
+    ${recent.length?`<div class="sect">
+      <div class="between"><h2>Recently visited</h2><button class="link" data-tab="saved">Memory map</button></div>
+      <div class="stack">${recent.map(p=>UI.placeRow(p)).join('')}</div>
+    </div>`:''}
+    <div style="height:8px"></div>`;
+  },
+  regenPlans(){
+    /* Each option avoids the previous option's stops, so the three genuinely differ. */
+    const used=[]; this.plans=[];
+    for(const k of ['relaxed','explore','adventure']){
+      let p=Planner.build(k,{exclude:used});
+      if(!p) p=Planner.build(k);
+      if(!p) continue;
+      p.stops.filter(s=>s.placeId).forEach(s=>used.push(s.placeId));
+      this.plans.push(p); Store.savePlan(p);
+    }
+  },
+
+  /* ---------------- EXPLORE ---------------- */
+  explore(){
+    const here=Store.here();
+    let list=allPlaces().filter(p=>this.exploreCat==='detour'
+        ? (p.scenic+p.uniqueness+p.foodValue)>=7
+        : this.exploreCat==='dogf' ? ['in','leash'].includes(p.dogStatus)
+        : this.exploreCat==='mine' ? p.source==='user'
+        : p.category===this.exploreCat||p.tags.includes(this.exploreCat));
+    list=applyFilters(list,this.exploreFilters);
+    if(Store.s.prefs.dogMode) list=list.filter(p=>['in','leash','out'].includes(p.dogStatus));
+    list=list.map(p=>({p,m:driveMin(here,p.coordinates)})).sort((a,b)=>a.m-b.m).map(x=>x.p);
+    const cats=[['detour','Worth a detour'],['food','Food'],['nature','Nature'],['village','Villages'],['city','Cities'],
+      ['beach','Beaches'],['hike','Hikes'],['view','Viewpoints'],['market','Markets'],['castle','Castles'],
+      ['motorsport','Motorsport'],['dogf','Dog friendly'],['product','Local products'],['mine','Your finds']];
+    return `
+    <button class="card row" data-sheet="find" style="width:100%;margin-bottom:12px;padding:12px 14px;text-align:left">
+      <span style="opacity:.6">${ICONS.explore}</span>
+      <span class="grow mut">Search anywhere, or paste coordinates</span></button>
+    <div class="chiprow" style="margin-bottom:8px">${cats.map(([k,l])=>
+      `<button class="chip ${this.exploreCat===k?'on':''}" data-ecat="${k}">${CATS[k]?CATS[k].e+' ':k==='dogf'?'🐕 ':''}${l}</button>`).join('')}</div>
+    <div class="chiprow" style="margin-bottom:12px">${FILTERS.map(f=>
+      `<button class="chip ${this.exploreFilters.has(f.id)?'on':''}" data-efil="${f.id}">${f.label}</button>`).join('')}</div>
+    <div class="between" style="margin-bottom:8px">
+      <div class="sm mut">${list.length} place${list.length===1?'':'s'}, nearest first</div>
+      <button class="link" data-sheet="route">Scenic route</button>
+    </div>
+    <div class="stack">${list.length?list.map(p=>UI.placeRow(p)).join(''):
+      this.exploreCat==='mine'
+        ? `<div class="empty"><span class="em">📍</span>Places you add appear here. Search for one, or press and hold the map.</div>`
+        : `<div class="empty"><span class="em">🧭</span>Nothing matches those filters. Clear a few and try again.</div>`}</div>`;
+  },
+
+  /* ---------------- TRIP ---------------- */
+  trip(){
+    const t=Store.s.trip, active=Store.base();
+    const byCountry={};
+    t.bases.forEach(b=>{const c=REGIONS[b.region].country;(byCountry[c]=byCountry[c]||[]).push(b);});
+    const totalKm=t.bases.reduce((a,b,i)=>i?a+driveKm(t.bases[i-1].coordinates,b.coordinates):0,0);
+    return `
+    <h1>${esc(t.name)}</h1>
+    <div class="sm mut" style="margin:6px 0 14px">${t.startDate} → ${t.endDate} · ${t.bases.length} bases · ≈ ${totalKm} km of driving</div>
+    <div class="row" style="gap:8px;margin-bottom:16px">
+      <button class="btn sm" data-addbase>Add a base</button>
+      <button class="btn sm" data-sheet="route">Plan a drive</button>
+      <button class="btn sm" data-sheet="parking">Parking</button>
+    </div>
+    ${Object.entries(byCountry).map(([c,bases])=>`
+      <div class="sect">
+        <h2>${REGIONS[bases[0].region].flag} ${esc(c)}</h2>
+        <div class="tlday" style="margin-top:12px">
+          ${bases.map((b,i)=>{
+            const prev=t.bases[t.bases.indexOf(b)-1];
+            const nights=Math.max(1,Math.round((new Date(b.departure)-new Date(b.arrival))/864e5));
+            const saved=Store.s.saved.map(s=>getPlace(s.placeId)).filter(p=>p&&driveMin(b.coordinates,p.coordinates)<=45).length;
+            return `<div style="position:relative;margin-bottom:12px">
+              <span class="dot ${b.id===active.id?'on':''}"></span>
+              <button class="card" data-base="${b.id}" style="text-align:left;width:100%;${b.id===active.id?'border-color:var(--gold)':''}">
+                <div class="between"><h3>${esc(b.name)}</h3>${b.id===active.id?'<span class="pill warn">You are here</span>':''}</div>
+                <div class="sm mut" style="margin-top:4px">${esc(REGIONS[b.region].name)} · ${b.arrival} → ${b.departure} · ${nights} night${nights===1?'':'s'}</div>
+                <div class="sm t2" style="margin-top:7px">🏠 ${esc(b.accommodation||'Not set')}</div>
+                ${b.parking?`<div class="sm t2">🅿️ ${esc(b.parking)}</div>`:''}
+                ${prev?`<div class="sm mut" style="margin-top:6px">${driveKm(prev.coordinates,b.coordinates)} km · ${mins2h(driveMin(prev.coordinates,b.coordinates))} from ${esc(prev.name)}</div>`:''}
+                ${saved?`<div class="row" style="gap:6px;margin-top:8px"><span class="pill">${saved} saved nearby</span></div>`:''}
+              </button></div>`;
+          }).join('')}
+        </div>
+      </div>`).join('')}
+    <div class="sect"><button class="btn block ghost" data-export>Export trip data</button></div>`;
+  },
+
+  /* ---------------- SAVED / MEMORY ---------------- */
+  saved(){
+    const tabs=[['saved','Saved'],['visited','Visited'],['timeline','Diary'],['stats','Trip so far']];
+    const body=this['sv_'+this.savedTab]();
+    return `<div class="seg" style="margin-bottom:14px">${tabs.map(([k,l])=>
+      `<button data-stab="${k}" class="${this.savedTab===k?'on':''}">${l}</button>`).join('')}</div>${body}`;
+  },
+  sv_saved(){
+    const list=Store.s.saved.map(s=>getPlace(s.placeId)).filter(Boolean);
+    if(!list.length) return `<div class="empty"><span class="em">🔖</span>Nothing saved yet. Tap the bookmark on any place and it stays available offline.</div>`;
+    return `<div class="stack">${list.map(p=>UI.placeRow(p)).join('')}</div>`;
+  },
+  sv_visited(){
+    const list=Store.s.visited.map(v=>({v,p:getPlace(v.placeId)})).filter(x=>x.p);
+    if(!list.length) return `<div class="empty"><span class="em">🗺️</span>Mark places as visited and this becomes your trip diary.</div>`;
+    return `<div class="stack">${list.map(({v,p})=>UI.placeRow(p)).join('')}</div>`;
+  },
+  sv_timeline(){
+    const items=[
+      ...Store.s.visited.map(v=>({d:v.date,t:'place',n:getPlace(v.placeId)?.name,x:v.rating})),
+      ...Store.s.foodLog.map(f=>({d:f.date,t:'food',n:FOODS.find(x=>x.id===f.foodId)?.name,x:'bought'})),
+      ...Store.s.dayLog.map(l=>({d:l.date,t:'day',n:l.title,x:`${l.done}/${l.done+l.skipped} stops`})),
+      ...Store.s.plans.slice(0,10).filter(p=>!Store.s.dayLog.some(l=>l.planId===p.id)).map(p=>({d:p.date,t:'plan',n:p.title,x:mins2h(p.driveMin)}))
+    ].filter(i=>i.n).sort((a,b)=>a.d<b.d?1:-1);
+    if(!items.length) return `<div class="empty"><span class="em">📖</span>Your diary fills itself as you visit places, buy food and run day plans.</div>`;
+    let last='';
+    return `<div class="tlday">${items.map(i=>{
+      const head=i.d!==last; last=i.d;
+      return `${head?`<div class="sm mut" style="margin:14px 0 6px;position:relative"><span class="dot on"></span>${new Date(i.d).toLocaleDateString([], {weekday:'short',day:'numeric',month:'short'})}</div>`:''}
+        <div class="card" style="margin-bottom:8px"><div class="between"><div class="grow"><strong>${i.t==='food'?'🧺 ':i.t==='plan'?'🧭 ':i.t==='day'?'🚗 ':'📍 '}${esc(i.n)}</strong></div><span class="pill">${esc(i.x||'')}</span></div></div>`;
+    }).join('')}</div>`;
+  },
+  sv_stats(){
+    const v=Store.s.visited, km=Store.s.trip.bases.reduce((a,b,i,arr)=>i?a+driveKm(arr[i-1].coordinates,b.coordinates):0,0);
+    const regions=[...new Set(v.map(x=>getPlace(x.placeId)?.region).filter(Boolean))];
+    const countries=[...new Set(regions.map(r=>REGIONS[r].country))];
+    const loved=v.filter(x=>x.rating==='loved').map(x=>getPlace(x.placeId)).filter(Boolean);
+    const foods=Store.s.foodLog.map(f=>FOODS.find(x=>x.id===f.foodId)).filter(Boolean);
+    const done=v.length, total=allPlaces().length;
+    return `
+    <div class="card"><div class="between"><h3>Places visited</h3><strong style="font-family:var(--display);font-size:24px">${done}</strong></div>
+      <div class="bar" style="margin-top:10px"><i style="width:${clamp(done/total*100,2,100)}%"></i></div>
+      <div class="sm mut" style="margin-top:6px">${done} of ${total} places in the guide</div></div>
+    <div class="row" style="gap:10px;margin-top:10px">
+      <div class="card grow"><div class="sm mut">Countries</div><strong style="font-family:var(--display);font-size:20px">${countries.length}</strong><div class="sm t2">${countries.join(', ')||'—'}</div></div>
+      <div class="card grow"><div class="sm mut">Base-to-base</div><strong style="font-family:var(--display);font-size:20px">${km} km</strong><div class="sm t2">planned driving</div></div>
+      <div class="card grow"><div class="sm mut">Days out</div><strong style="font-family:var(--display);font-size:20px">${Store.s.dayLog.length}</strong><div class="sm t2">${Math.round(Store.s.dayLog.reduce((a,l)=>a+(l.driveMin||0),0)/60)}h driving</div></div>
+    </div>
+    <div class="sect"><h2>Favourites</h2>
+      <div class="stack" style="margin-top:10px">${loved.length?loved.map(p=>UI.placeRow(p)).join(''):'<div class="card mut sm">Rate a place “Loved it” and it lands here.</div>'}</div></div>
+    <div class="sect"><h2>Food bought</h2>
+      <div class="row wrap" style="gap:8px;margin-top:10px">${foods.length?foods.map(f=>`<span class="pill">${f.emoji} ${esc(f.name)}</span>`).join(''):'<div class="card mut sm">Nothing logged yet.</div>'}</div></div>
+    <div class="sect"><button class="btn block" data-tab="map">See the memory map</button></div>`;
+  },
+};
+
+/* =====================================================================
+   6. MAP — canvas slippy map. Draws OSM raster tiles when the network
+   allows it, and falls back to a readable abstract basemap offline.
+   ===================================================================== */
+const MapView=(()=>{
+  let cv,ctx,wrap,mkl,W=0,H=0,dpr=1;
+  let center={lat:43.31,lng:-2.0}, zoom=7.2, tilesOK=true, fails=0;
+  const cache=new Map();
+  let mounted=false, filter='all';
+  const worldPx=z=>256*Math.pow(2,z);
+  const lng2x=(lng,z)=>(lng+180)/360*worldPx(z);
+  const lat2y=(lat,z)=>{const s=Math.sin(lat*Math.PI/180);return (0.5-Math.log((1+s)/(1-s))/(4*Math.PI))*worldPx(z);};
+  const x2lng=(x,z)=>x/worldPx(z)*360-180;
+  const y2lat=(y,z)=>{const n=Math.PI-2*Math.PI*y/worldPx(z);return 180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n)));};
+  const toScreen=(ll)=>({x:(lng2x(ll.lng,zoom)-lng2x(center.lng,zoom))+W/2,y:(lat2y(ll.lat,zoom)-lat2y(center.lat,zoom))+H/2});
+
+  function ensure(){
+    if(wrap) return;
+    wrap=el(`<div id="mapwrap" style="display:none">
+      <canvas id="mapcv"></canvas><div id="mkl"></div>
+      <div class="maptools">
+        <button class="iconbtn" data-mapz="1" aria-label="Zoom in"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg></button>
+        <button class="iconbtn" data-mapz="-1" aria-label="Zoom out"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 12h12"/></svg></button>
+        <button class="iconbtn" data-maphere aria-label="Centre on me">${ICONS.pin}</button>
+        <button class="iconbtn" data-sheet="find" aria-label="Search for a place">${ICONS.explore}</button>
+      </div>
+      <div class="chiprow" style="position:absolute;top:calc(env(safe-area-inset-top,0px) + 68px);left:0;right:0;margin:0;padding:0 12px">
+        ${[['all','All'],['saved','Saved'],['visited','Visited'],['food','Food'],['nature','Nature'],['event','Events'],['dog','Dog friendly'],['parking','Car']]
+          .map(([k,l])=>`<button class="chip" data-mfil="${k}">${l}</button>`).join('')}
+      </div>
+      <div class="attrib" id="attrib"></div>
+      <div class="banner" style="position:absolute;left:12px;right:60px;bottom:52px;font-size:12px">Press and hold the map to save a spot</div></div>`);
+    document.body.appendChild(wrap);
+    cv=$('#mapcv',wrap); ctx=cv.getContext('2d'); mkl=$('#mkl',wrap);
+    bindGestures();
+    window.addEventListener('resize',()=>{resize();draw();});
+  }
+  function resize(){
+    dpr=Math.min(2,window.devicePixelRatio||1);
+    W=wrap.clientWidth; H=wrap.clientHeight;
+    cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  function tile(z,x,y){
+    const key=z+'/'+x+'/'+y;
+    if(cache.has(key)) return cache.get(key);
+    const img=new Image(); img.crossOrigin='anonymous';
+    img.onload=()=>{img.ok=true;draw();};
+    img.onerror=()=>{img.bad=true;if(++fails>5){tilesOK=false;draw();}};
+    img.src=Config.tiles.url.replace('{z}',z).replace('{x}',x).replace('{y}',y);
+    cache.set(key,img); if(cache.size>260){const k=cache.keys().next().value;cache.delete(k);}
+    return img;
+  }
+  function bg(){
+    /* Abstract basemap: land wash, graticule, region labels. Always available. */
+    const g=ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#1b232b'); g.addColorStop(1,'#141a20');
+    ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--surf2')||'#20262e';
+    ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='rgba(127,140,153,.22)'; ctx.lineWidth=1;
+    for(let lat=Math.floor(y2lat(lat2y(center.lat,zoom)+H/2,zoom));lat<=Math.ceil(y2lat(lat2y(center.lat,zoom)-H/2,zoom));lat+=0.5){
+      const y=toScreen({lat,lng:center.lng}).y; ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+    }
+    for(let lng=Math.floor(x2lng(lng2x(center.lng,zoom)-W/2,zoom));lng<=Math.ceil(x2lng(lng2x(center.lng,zoom)+W/2,zoom));lng+=0.5){
+      const x=toScreen({lat:center.lat,lng}).x; ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();
+    }
+    ctx.fillStyle='rgba(127,140,153,.85)'; ctx.font='600 11px Inter,sans-serif';
+    for(const r of Object.values(REGIONS)){ const s=toScreen(r.c);
+      if(s.x>-40&&s.x<W+40&&s.y>0&&s.y<H) ctx.fillText(r.name.toUpperCase(),s.x-r.name.length*3,s.y); }
+  }
+  function draw(){
+    if(!ctx||!W||!H) return;
+    ctx.clearRect(0,0,W,H);
+    if(tilesOK){
+      const z=clamp(Math.round(zoom),3,Config.tiles.maxZoom), sc=Math.pow(2,zoom-z), ts=256*sc;
+      const cx=lng2x(center.lng,z)*sc, cy=lat2y(center.lat,z)*sc;
+      const x0=Math.floor((cx-W/2)/ts), x1=Math.floor((cx+W/2)/ts);
+      const y0=Math.floor((cy-H/2)/ts), y1=Math.floor((cy+H/2)/ts);
+      const n=Math.pow(2,z); let drew=0;
+      ctx.fillStyle='#22282f'; ctx.fillRect(0,0,W,H);
+      for(let x=x0;x<=x1;x++) for(let y=y0;y<=y1;y++){
+        if(y<0||y>=n) continue; const tx=((x%n)+n)%n;
+        const img=tile(z,tx,y);
+        const px=Math.round(x*ts-cx+W/2), py=Math.round(y*ts-cy+H/2);
+        if(img.ok){ ctx.drawImage(img,px,py,Math.ceil(ts),Math.ceil(ts)); drew++; }
+      }
+      if(!drew&&fails>5) tilesOK=false;
+      if(!tilesOK) bg();
+    } else bg();
+    $('#attrib').textContent = tilesOK?Config.tiles.attribution:'Offline basemap · positions are accurate, detail is not';
+    markers();
+  }
+  function items(){
+    const out=[];
+    const wantAll=filter==='all';
+    for(const p of allPlaces()){
+      const sv=Store.isSaved(p.id), vs=!!Store.visit(p.id);
+      let ok=wantAll||(filter==='saved'&&sv)||(filter==='visited'&&vs)||
+        (filter==='food'&&(p.category==='food'||p.tags.includes('food')))||
+        (filter==='nature'&&['nature','hike','beach','view'].includes(p.category))||
+        (filter==='dog'&&['in','leash'].includes(p.dogStatus));
+      if(wantAll&&Store.s.prefs.dogMode&&p.dogStatus==='no') ok=false;
+      if(ok) out.push({ll:p.coordinates,kind:sv?'sv':vs?'vs':'pl',e:CATS[p.category].e,id:p.id,type:'place'});
+    }
+    if(wantAll||filter==='event') for(const e of Events.near(200,'week')) out.push({ll:e.coordinates,kind:'ev',e:Events.kindEmoji(e.kind),id:e.id,type:'event'});
+    if((wantAll||filter==='parking')&&Store.s.parking) out.push({ll:Store.s.parking.coordinates,kind:'pk',e:'🚗',id:'car',type:'parking'});
+    for(const b of Store.s.trip.bases) if(wantAll||filter==='saved') out.push({ll:b.coordinates,kind:'bs',e:'🏠',id:b.id,type:'base'});
+    return out;
+  }
+  function markers(){
+    const list=items().map(i=>({...i,s:toScreen(i.ll)})).filter(i=>i.s.x>-60&&i.s.x<W+60&&i.s.y>-60&&i.s.y<H+60);
+    /* grid clustering */
+    const cell=62, grid=new Map();
+    for(const i of list){ const k=Math.floor(i.s.x/cell)+':'+Math.floor(i.s.y/cell);
+      (grid.get(k)||grid.set(k,[]).get(k)).push(i); }
+    let html='';
+    for(const [,g] of grid){
+      if(g.length>1&&zoom<11){
+        const x=g.reduce((a,i)=>a+i.s.x,0)/g.length, y=g.reduce((a,i)=>a+i.s.y,0)/g.length;
+        html+=`<button class="mk cl" style="left:${x}px;top:${y+17}px" data-mcl="${g.map(i=>i.ll.lat.toFixed(3)+','+i.ll.lng.toFixed(3)).join('|')}">${g.length}</button>`;
+      } else for(const i of g){
+        html+=`<button class="mk ${i.kind}" style="left:${i.s.x}px;top:${i.s.y}px" data-mk="${i.type}:${i.id}"><span>${i.e}</span></button>`;
+      }
+    }
+    const h=Store.here(), hs=toScreen(h);
+    html+=`<div class="mk" style="left:${hs.x}px;top:${hs.y}px;background:var(--gold);border-color:transparent"><span>🧭</span></div>`;
+    mkl.innerHTML=html;
+  }
+  function fromScreen(x,y){
+    return {lat:clamp(y2lat(lat2y(center.lat,zoom)+(y-H/2),zoom),-84,84),
+            lng:x2lng(lng2x(center.lng,zoom)+(x-W/2),zoom)};
+  }
+  function bindGestures(){
+    let drag=null, pinch=null, hold=null;
+    const cancelHold=()=>{ if(hold){clearTimeout(hold);hold=null;} };
+    cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY};
+      cancelHold();
+      hold=setTimeout(()=>{ hold=null; drag=null;
+        const r=cv.getBoundingClientRect();
+        api.drop(fromScreen(e.clientX-r.left,e.clientY-r.top));
+      },550);
+    });
+    cv.addEventListener('pointermove',e=>{
+      if(drag&&Math.hypot(e.clientX-drag.x0,e.clientY-drag.y0)>9) cancelHold();
+      if(!drag||pinch) return;
+      const dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag={x:e.clientX,y:e.clientY,x0:drag.x0,y0:drag.y0};
+      const cx=lng2x(center.lng,zoom)-dx, cy=lat2y(center.lat,zoom)-dy;
+      center={lng:x2lng(cx,zoom),lat:clamp(y2lat(cy,zoom),-84,84)}; draw();
+    });
+    cv.addEventListener('pointerup',()=>{drag=null;cancelHold();});
+    cv.addEventListener('pointercancel',()=>{drag=null;cancelHold();});
+    cv.addEventListener('wheel',e=>{e.preventDefault();zoomBy(-e.deltaY/400);},{passive:false});
+    cv.addEventListener('touchstart',e=>{ if(e.touches.length===2){drag=null;cancelHold();
+      pinch=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);} },{passive:true});
+    cv.addEventListener('touchmove',e=>{ if(e.touches.length===2&&pinch){
+      const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+      zoomBy(Math.log2(d/pinch)); pinch=d; } },{passive:true});
+    cv.addEventListener('touchend',()=>{pinch=null;});
+    let lastTap=0;
+    cv.addEventListener('click',()=>{const t=Date.now(); if(t-lastTap<300) zoomBy(1); lastTap=t;});
+  }
+  function zoomBy(d){ zoom=clamp(zoom+d,3,Config.tiles.maxZoom); draw(); }
+  const api={
+    mount(){ ensure(); wrap.style.display='block'; if(!mounted){ mounted=true; const h=Store.here(); center={lat:h.lat,lng:h.lng}; zoom=9; }
+      resize(); draw(); wrap.querySelectorAll('[data-mfil]').forEach(b=>b.classList.toggle('on',b.dataset.mfil===filter)); },
+    setFilter(f){ filter=f; wrap.querySelectorAll('[data-mfil]').forEach(b=>b.classList.toggle('on',b.dataset.mfil===f)); draw(); },
+    zoomBy, draw,
+    goto(ll,z){ ensure(); center={lat:ll.lat,lng:ll.lng}; if(z)zoom=z; Views.tab='map'; Views.render(); },
+    fit(lls){ ensure(); if(!lls.length) return;
+      const lats=lls.map(l=>l.lat), lngs=lls.map(l=>l.lng);
+      center={lat:(Math.min(...lats)+Math.max(...lats))/2,lng:(Math.min(...lngs)+Math.max(...lngs))/2};
+      const span=Math.max(Math.max(...lats)-Math.min(...lats),(Math.max(...lngs)-Math.min(...lngs))*0.7);
+      zoom=clamp(Math.log2(360/Math.max(0.05,span))-0.4,4,13);
+      Views.tab='map'; Views.render(); },
+    center(){ return center; },
+    fromScreen,
+    /* press and hold anywhere: name the spot, then offer to save it */
+    async drop(ll){
+      Shell.toast('Looking up that spot…');
+      const r=await Geocode.reverse(ll.lat,ll.lng);
+      Sheets.open('newplace',{name:r?r.name:'Dropped pin',detail:r?r.detail:'Coordinates from the map',lat:ll.lat,lng:ll.lng});
+    }
+  };
+  return api;
+})();
+
+/* =====================================================================
+   7. SHEETS
+   ===================================================================== */
+const Sheets={
+  open(name,arg){
+    const s=this[name]?.(arg); if(!s) return;
+    const scrim=el('<div class="scrim"></div>');
+    const sheet=el(`<div class="sheet"><div class="grab"></div>
+      <div class="hd"><div class="grow"><h2>${s.title}</h2>${s.sub?`<div class="sm mut" style="margin-top:3px">${s.sub}</div>`:''}</div>
+      <button class="iconbtn" data-close aria-label="Close"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <div class="sc">${s.body}</div></div>`);
+    $('#layers').append(scrim,sheet);
+    requestAnimationFrame(()=>{scrim.classList.add('in');sheet.classList.add('in');});
+    scrim.addEventListener('click',()=>Sheets.close());
+    this._cur={scrim,sheet,name,arg}; s.after?.(sheet);
+  },
+  close(){ const c=this._cur; if(!c) return; this._cur=null;
+    c.sheet.classList.remove('in'); c.scrim.classList.remove('in');
+    setTimeout(()=>{c.sheet.remove();c.scrim.remove();},260); },
+  refresh(){ const c=this._cur; if(!c) return; const {name,arg}=c; this.close(); setTimeout(()=>this.open(name,arg),20); },
+
+  /* ---- place detail ---- */
+  place(id){
+    const p=getPlace(id); if(!p) return null;
+    const w=WorthIt.eval(p), v=Store.visit(id), saved=Store.isSaved(id);
+    const foods=FOODS.filter(f=>f.region===p.region).slice(0,4);
+    return {title:esc(p.name), sub:`${REGIONS[p.region].flag} ${esc(REGIONS[p.region].name)} · ${CATS[p.category].n}${p.source==='user'?' · your own find':''}`, body:`
+      ${UI.thumb(p,'aspect-ratio:16/8;border-radius:16px')}
+      <div class="verdict" style="margin:14px 0">${esc(w.verdict)}${w.pair?' '+esc(w.pair):''}</div>
+      <p class="t2">${esc(p.why)}</p>
+      ${w.flags.map(f=>`<div class="banner" style="margin-top:8px">${esc(f)}</div>`).join('')}
+      <div style="margin-top:14px">${UI.scorecard(p,w)}</div>
+      ${p.openingHours?`<div class="sm mut" style="margin-top:10px">🕒 ${esc(p.openingHours)}</div>`:''}
+      <div class="xs mut" style="margin-top:6px">${p.coordinates.lat.toFixed(4)}, ${p.coordinates.lng.toFixed(4)}${p.address?' · '+esc(p.address):''}</div>
+      <div class="row wrap" style="gap:6px;margin-top:12px">${p.tags.filter(t=>!['outdoor','indoor'].includes(t)).map(t=>`<span class="pill">${t.replace('-',' ')}</span>`).join('')}</div>
+      <div class="sect"><h3>Dog notes</h3>
+        <div class="score" style="margin-top:8px">
+          <div><div class="k">Access</div><div class="v">${(DOG[p.dogStatus]||{}).l}</div></div>
+          <div><div class="k">Water</div><div class="v">${p.tags.includes('beach')||p.tags.includes('nature')?'Natural water':'Bring a bowl'}</div></div>
+          <div><div class="k">Shade</div><div class="v">${p.tags.includes('shade')?'Good':p.tags.includes('beach')?'Little':'Patchy'}</div></div>
+          <div><div class="k">Walking</div><div class="v">${p.category==='hike'?'Demanding':p.category==='city'?'Pavement':'Easy'}</div></div>
+          <div><div class="k">Hot pavement</div><div class="v">${p.tags.includes('hot-ok')?'Low risk':'Check after 13:00'}</div></div>
+          <div><div class="k">On transport</div><div class="v">8 kg — carrier or lap, usually fine</div></div>
+        </div></div>
+      ${foods.length?`<div class="sect"><h3>Eat or buy here</h3>
+        <div class="row wrap" style="gap:8px;margin-top:8px">${foods.map(f=>`<button class="pill" data-food="${f.id}">${f.emoji} ${esc(f.name)}</button>`).join('')}</div></div>`:''}
+      <div class="stack" style="margin-top:18px">
+        <div class="row" style="gap:8px">
+          <button class="btn primary grow" data-save="${id}">${saved?'Remove from saved':'Save this place'}</button>
+          <button class="btn" data-showmap="${id}">Map</button>
+        </div>
+        <div class="row" style="gap:8px">
+          ${['loved','good','okay','skip'].map(r=>`<button class="btn sm grow ${v&&v.rating===r?'primary':''}" data-rate="${id}:${r}">${({loved:'Loved it',good:'Good',okay:'Okay',skip:'Would skip'})[r]}</button>`).join('')}
+        </div>
+        <textarea rows="2" placeholder="Notes for later…" data-note="${id}">${esc(Store.s.notes[id]||'')}</textarea>
+        ${p.source==='user'?`<div class="row" style="gap:8px">
+          <button class="btn sm grow" data-editplace="${id}">Edit the details</button>
+          <button class="btn sm ghost" data-delplace="${id}">Delete</button></div>`:''}
+        ${v?`<button class="btn ghost sm" data-unvisit="${id}">Remove from visited</button>`:''}
+      </div>`};
+  },
+
+  /* ---- day planner ---- */
+  planner(){
+    const pr=Store.s.prefs;
+    const tags=['food','nature','scenic-road','village','city','beach','hike','market','castle','history','festival','product','view','motorsport'];
+    return {title:'Plan a day', sub:'Realistic timings, including driving and lunch', body:`
+      <div class="stack" style="gap:12px">
+        <div class="fld"><label>Starting from</label>
+          <select id="pl-from">${Store.s.trip.bases.map(b=>`<option value="${b.id}" ${b.id===Store.s.activeBaseId?'selected':''}>${esc(b.name)}</option>`).join('')}</select></div>
+        <div class="row" style="gap:10px">
+          <div class="fld grow"><label>Leave at</label><input id="pl-start" type="time" value="${pr.startTime}"></div>
+          <div class="fld grow"><label>Back by</label><input id="pl-end" type="time" value="${pr.returnTime}"></div>
+        </div>
+        <div class="fld"><label>Maximum driving, one way</label>
+          <select id="pl-drive">${[30,45,60,90,120,180].map(m=>`<option value="${m}" ${m===pr.maxDriveMin?'selected':''}>${mins2h(m)}</option>`).join('')}</select></div>
+        <div class="between card"><div><strong>Dog with us</strong><div class="sm mut">Filters out anywhere dogs are banned</div></div>
+          <button class="sw ${pr.dogMode?'on':''}" data-dogmode></button></div>
+        <div class="fld"><label>Pace</label>
+          <div class="seg">${['relaxed','normal','busy'].map(i=>`<button data-pace="${i}" class="${pr.intensity===i?'on':''}">${i[0].toUpperCase()+i.slice(1)}</button>`).join('')}</div></div>
+        <div class="fld"><label>What do you feel like?</label>
+          <div class="row wrap" style="gap:7px">${tags.map(t=>`<button class="chip" data-ptag="${t}" style="min-height:36px;padding:7px 12px">${t.replace('-',' ')}</button>`).join('')}</div></div>
+        <div class="fld"><label>Day shape</label>
+          <div class="seg">${Object.entries(Planner.themes).map(([k,t],i)=>`<button data-ptheme="${k}" class="${i===1?'on':''}">${t.label}</button>`).join('')}</div></div>
+        <button class="btn primary block" data-plgen>Generate the day</button>
+        <div id="pl-out"></div>
+      </div>`};
+  },
+
+  plan(id){
+    const p=Store.s.plans.find(x=>x.id===id); if(!p) return null;
+    return {title:esc(p.title), sub:`${p.date} · ${mins2h(p.driveMin)} driving · ≈ €${p.cost}`, body:`
+      ${UI.planCard(p)}
+      <div class="sect"><h3>Stops in detail</h3>
+        <div class="stack" style="margin-top:10px">${p.stops.filter(s=>s.placeId).map(s=>UI.placeRow(getPlace(s.placeId))).join('')}</div></div>`};
+  },
+
+  /* ---- weather ---- */
+  weather(){
+    const w=Weather.now;
+    if(!w) return {title:'Weather',body:'<div class="empty">No reading yet. <button class="btn sm" data-wrefresh>Try again</button></div>'};
+    const mood=Weather.mood();
+    const advice=mood==='rain'
+      ? 'Rain plan: market halls, arcaded old towns, a car museum, and a long lunch. Dog stays drier in towns than on cliffs.'
+      : mood==='hot' ? 'Heat plan: coast or shaded river valleys before 12:00, then a village terrace after 18:00. Check pavement temperature for paws.'
+      : 'Good conditions. Spend it outdoors — viewpoints, coastal walks and villages first, indoor things later in the week.';
+    return {title:'Weather', sub:`${esc(Store.here().name)} · ${esc(w.source)}`, body:`
+      <div class="card"><div class="row" style="gap:12px">
+        <span style="font-size:42px">${Weather.icon(w.code)}</span>
+        <div><div style="font-family:var(--display);font-size:32px;font-weight:700">${w.temp}°C</div>
+        <div class="sm t2">${esc(Weather.desc(w.code))} · feels ${w.feels}°</div></div>
+        <div class="grow"></div>
+        <div class="sm t2" style="text-align:right">${w.rain}% rain<br>${w.wind} km/h</div>
+      </div></div>
+      <div class="sect"><h3>Next 12 hours</h3>
+        <div class="hscroll" style="margin-top:10px">${w.hourly.map(h=>`
+          <div class="card" style="width:64px;text-align:center;padding:10px 6px">
+            <div class="sm mut">${pad(h.h)}</div>
+            <div style="font-family:var(--display);font-weight:700;margin:4px 0">${h.t}°</div>
+            <div class="xs ${h.r>50?'':'mut'}">${h.r}%</div></div>`).join('')}</div></div>
+      <div class="sect"><h3>Next days</h3>
+        <div class="stack" style="margin-top:10px">${w.daily.map((d,i)=>{
+          const dt=new Date(); dt.setDate(dt.getDate()+i);
+          return `<div class="card between"><div class="row" style="gap:10px"><span style="font-size:20px">${Weather.icon(d.code)}</span>
+            <strong>${i===0?'Today':dt.toLocaleDateString([], {weekday:'long'})}</strong></div>
+            <div class="sm t2">${d.lo}° / <strong>${d.hi}°</strong>${d.r!=null?` · ${d.r}%`:''}</div></div>`;}).join('')}</div></div>
+      <div class="verdict" style="margin-top:16px">${advice}</div>
+      <button class="btn block ghost" style="margin-top:14px" data-wrefresh>Refresh</button>`};
+  },
+
+  /* ---- events radar ---- */
+  events(){
+    const list=Events.near(Views.eventRadius,Views.eventWhen);
+    return {title:'Events radar', sub:'Spontaneous detours only — no ticketed tourist machinery', body:`
+      <div class="seg" style="margin-bottom:10px">${[['today','Today'],['tomorrow','Tomorrow'],['week','This week']]
+        .map(([k,l])=>`<button data-ewhen="${k}" class="${Views.eventWhen===k?'on':''}">${l}</button>`).join('')}</div>
+      <div class="chiprow" style="margin-bottom:14px">${[10,25,50,100].map(r=>
+        `<button class="chip ${Views.eventRadius===r?'on':''}" data-erad="${r}">${r} km</button>`).join('')}</div>
+      <div class="stack">${list.length?list.map(e=>`
+        <div class="card"><div class="between"><h3>${Events.kindEmoji(e.kind)} ${esc(e.name)}</h3><span class="pill">${e.km} km</span></div>
+          <div class="sm mut" style="margin-top:4px">${new Date(e.date).toLocaleDateString([], {weekday:'short',day:'numeric',month:'short'})} · ${e.time} · ${esc(e.cost)}</div>
+          <div class="sm t2" style="margin-top:7px">${esc(e.why)}</div>
+          <div class="row" style="gap:6px;margin-top:9px">
+            <span class="pill">${mins2h(e.min)} drive</span>${e.dogFriendly?'<span class="pill good">🐕 fine</span>':'<span class="pill bad">🐕 no</span>'}
+            <button class="pill" data-emap="${e.id}">Show on map</button></div></div>`).join(''):
+        `<div class="empty"><span class="em">📻</span>Quiet within ${Views.eventRadius} km. Widen the radius or look at the week.</div>`}</div>
+      <div class="sm mut" style="margin-top:14px">Demo event data. Connect a live source in Settings → Data sources.</div>`};
+  },
+
+  /* ---- food hunter ---- */
+  food(id){
+    if(id&&FOODS.some(f=>f.id===id)){
+      const f=FOODS.find(x=>x.id===id), got=Store.s.foodLog.some(x=>x.foodId===id);
+      return {title:`${f.emoji} ${esc(f.name)}`, sub:esc(REGIONS[f.region].name), body:`
+        <p class="t2">${esc(f.what)}</p>
+        <div class="score" style="margin-top:12px">
+          <div><div class="k">Price</div><div class="v">${esc(f.priceRange)}</div></div>
+          <div><div class="k">Travels in a car</div><div class="v">${f.travelsWell?'Yes':'Eat it there'}</div></div>
+          <div><div class="k">Souvenir</div><div class="v">${f.goodSouvenir?'Worth taking home':'No'}</div></div>
+          <div><div class="k">Region</div><div class="v">${REGIONS[f.region].flag} ${esc(REGIONS[f.region].country)}</div></div>
+        </div>
+        <div class="sect"><h3>Why it is from here</h3><p class="t2">${esc(f.why)}</p></div>
+        <div class="sect"><h3>How locals have it</h3><p class="t2">${esc(f.how)}</p></div>
+        <div class="sect"><h3>Where to look</h3><p class="t2">${esc(f.whereToLook)}</p></div>
+        <button class="btn ${got?'':'primary'} block" style="margin-top:16px" data-bought="${f.id}">${got?'Already in your trip diary ✓':'Bought it'}</button>`};
+    }
+    const region=Store.region();
+    const here=FOODS.filter(f=>f.region===region), rest=FOODS.filter(f=>f.region!==region);
+    const row=f=>`<button class="hcard" data-food="${f.id}">
+      <div class="th"><div class="gl" style="${UI.grad('product',f.id)}"></div><span class="em" style="position:relative">${f.emoji}</span></div>
+      <div class="bd"><div class="between"><h3 class="ell">${esc(f.name)}</h3>${Store.s.foodLog.some(x=>x.foodId===f.id)?'<span class="pill good">Bought</span>':''}</div>
+      <div class="sm mut ell">${esc(f.priceRange)} · ${f.travelsWell?'travels well':'eat it there'}</div>
+      <div class="sm t2 ell" style="margin-top:5px">${esc(f.what)}</div></div></button>`;
+    return {title:'Food hunter', sub:`What to eat and buy around ${esc(REGIONS[region].name)}`, body:`
+      <button class="btn block" data-sheet="scanner" style="margin-bottom:14px">📷 Identify something in a shop</button>
+      <h3>In this region</h3><div class="stack" style="margin:10px 0 18px">${here.map(row).join('')||'<div class="card mut sm">Nothing logged for this region yet.</div>'}</div>
+      <h3>Elsewhere on the route</h3><div class="stack" style="margin-top:10px">${rest.map(row).join('')}</div>`};
+  },
+
+  /* ---- scanner (camera-ready, mock analysis) ---- */
+  scanner(){
+    return {title:'Identify a product', sub:'Photograph a cheese, bottle, tin or menu', body:`
+      <div class="card" style="text-align:center;padding:22px">
+        <div style="font-size:40px">📷</div>
+        <p class="t2" style="margin-top:8px">Take a photo and the app tells you what it is, whether it is local, how to eat it and whether the price is fair.</p>
+        <input type="file" accept="image/*" capture="environment" id="scan-file" style="margin-top:12px">
+        <div id="scan-out" style="margin-top:14px"></div>
+      </div>
+      <div class="banner" style="margin-top:14px">No vision provider configured, so this runs in demo mode and returns a worked example. Add a provider in Settings → Data sources and the same screen starts using it.</div>
+      ${Store.s.scans.length?`<div class="sect"><h3>Earlier scans</h3><div class="stack" style="margin-top:10px">${Store.s.scans.slice(0,8).map(s=>
+        `<div class="card"><strong>${esc(s.guess)}</strong><div class="sm mut">${s.date}</div></div>`).join('')}</div></div>`:''}`,
+      after(sheet){
+        $('#scan-file',sheet)?.addEventListener('change',e=>{
+          const f=e.target.files?.[0]; if(!f) return;
+          const out=$('#scan-out',sheet); out.innerHTML='<div class="sm mut">Looking at it…</div>';
+          setTimeout(()=>{
+            const region=Store.region();
+            const guess=FOODS.filter(x=>x.region===region)[Math.floor(Math.random()*Math.max(1,FOODS.filter(x=>x.region===region).length))]||FOODS[0];
+            Store.s.scans.unshift({id:uid('scan'),guess:guess.name,date:todayISO()}); Store.save();
+            out.innerHTML=`<div style="text-align:left">
+              <div class="verdict">Looks like <strong>${esc(guess.name)}</strong>. ${esc(guess.why)}</div>
+              <div class="score" style="margin-top:12px">
+                <div><div class="k">Local here</div><div class="v">${guess.region===region?'Yes':'Imported to this region'}</div></div>
+                <div><div class="k">Fair price</div><div class="v">${esc(guess.priceRange)}</div></div>
+                <div><div class="k">How to eat</div><div class="v" style="font-size:12.5px;font-weight:500">${esc(guess.how)}</div></div>
+                <div><div class="k">Worth buying</div><div class="v">${guess.goodSouvenir?'Yes, travels well':'Only to eat now'}</div></div></div>
+              <div class="sm mut" style="margin-top:10px">Demo result — pattern matched to the region you are in, not to the photo.</div></div>`;
+          },900);
+        });
+      }};
+  },
+
+  /* ---- parking ---- */
+  parking(){
+    const pk=Store.s.parking, here=Store.here();
+    return {title:'Parking', sub:pk?'Saved spot':'Nothing saved yet', body:`
+      ${pk?`<div class="card">
+        <div class="between"><h3>🚗 Car parked here</h3><span class="pill">${Math.round(haversine(here,pk.coordinates)*1000)} m away</span></div>
+        <div class="sm mut" style="margin-top:6px">Parked ${new Date(pk.at).toLocaleString([], {weekday:'short',hour:'2-digit',minute:'2-digit'})}</div>
+        ${pk.expires?`<div class="sm ${pk.expires<new Date().toTimeString().slice(0,5)?'':'t2'}" style="margin-top:4px">Paid until ${esc(pk.expires)}${pk.expires<new Date().toTimeString().slice(0,5)?' — expired':''}</div>`:''}
+        ${pk.note?`<div class="sm t2" style="margin-top:8px">📝 ${esc(pk.note)}</div>`:''}
+        ${pk.photo?`<img src="${pk.photo}" style="width:100%;border-radius:12px;margin-top:10px" alt="Parking sign">`:''}
+        <div class="row" style="gap:8px;margin-top:12px">
+          <button class="btn sm grow" data-parkmap>Walk back to the car</button>
+          <button class="btn sm" data-parkclear>Clear</button></div></div>`:''}
+      <div class="sect"><h3>${pk?'Park somewhere else':'Save where you parked'}</h3>
+        <div class="stack" style="margin-top:10px">
+          <div class="fld"><label>Note — level, street, landmark</label><input id="pk-note" placeholder="Level -2, blue zone, near lift B" value="${esc(pk?.note||'')}"></div>
+          <div class="fld"><label>Paid until</label><input id="pk-exp" type="time" value="${esc(pk?.expires||'')}"></div>
+          <div class="fld"><label>Photo of the sign</label><input id="pk-photo" type="file" accept="image/*" capture="environment"></div>
+          <button class="btn primary block" data-parksave>Save this spot</button>
+          <button class="btn block ghost" data-parktimer>Remind me before it expires</button>
+        </div></div>
+      <div class="banner" style="margin-top:14px">Photograph the sign now, read it later. Sign interpretation will be added to this screen when a vision provider is configured.</div>`,
+      after(sheet){
+        $('#pk-photo',sheet)?.addEventListener('change',e=>{
+          const f=e.target.files?.[0]; if(!f) return; const r=new FileReader();
+          r.onload=()=>{ Sheets._pendingPhoto=r.result; Shell.toast('Photo attached'); };
+          r.readAsDataURL(f);
+        });
+      }};
+  },
+
+  /* ---- scenic route ---- */
+  route(){
+    const bases=Store.s.trip.bases;
+    return {title:'Plan a drive', sub:'Pick the character of the road, not just the fastest line', body:`
+      <div class="stack" style="gap:12px">
+        <div class="fld"><label>From</label><select id="rt-a">${bases.map(b=>`<option value="${b.id}" ${b.id===Store.s.activeBaseId?'selected':''}>${esc(b.name)}</option>`).join('')}</select></div>
+        <div class="fld"><label>To</label><select id="rt-b">${bases.map((b,i)=>`<option value="${b.id}" ${b.id===(Store.nextBase()?.id)?'selected':''}>${esc(b.name)}</option>`).join('')}</select></div>
+        <div class="fld"><label>Character</label>
+          <div class="row wrap" style="gap:7px">${['Fastest','Scenic','Coast','Mountains','Villages','Food stops']
+            .map((k,i)=>`<button class="chip ${i===1?'on':''}" data-rtstyle="${k.toLowerCase()}" style="min-height:36px;padding:7px 12px">${k}</button>`).join('')}</div></div>
+        <div class="fld"><label>Extra time you will accept</label>
+          <div class="seg">${[['15','+15 min'],['30','+30 min'],['60','+60 min'],['999','No limit']].map(([v,l],i)=>
+            `<button data-rtextra="${v}" class="${i===1?'on':''}">${l}</button>`).join('')}</div></div>
+        <button class="btn primary block" data-rtgo>Build the route</button>
+        <div id="rt-out"></div>
+      </div>
+      <div class="banner" style="margin-top:14px">Routes are built from real distances plus hand-picked stops. Turn-by-turn arrives when a routing key is added in Settings.</div>`};
+  },
+
+  /* ---- base editor ---- */
+  base(id){
+    const b=Store.s.trip.bases.find(x=>x.id===id)||{id:uid('b'),name:'',region:Store.region(),coordinates:REGIONS[Store.region()].c,arrival:todayISO(),departure:todayISO(),accommodation:'',notes:'',parking:''};
+    const isNew=!Store.s.trip.bases.some(x=>x.id===b.id);
+    const nearby=allPlaces().filter(p=>driveMin(b.coordinates,p.coordinates)<=40).slice(0,6);
+    return {title:isNew?'New base':esc(b.name), sub:isNew?'':esc(REGIONS[b.region].name), body:`
+      <div class="stack" style="gap:12px">
+        <div class="fld"><label>Name</label><input id="bs-name" value="${esc(b.name)}" placeholder="Where are you staying?"></div>
+        <div class="fld"><label>Coordinates</label>
+          <input id="bs-ll" value="${b.coordinates?b.coordinates.lat.toFixed(5)+', '+b.coordinates.lng.toFixed(5):''}" placeholder="Paste, or look it up">
+          <div class="row" style="gap:8px;margin-top:8px"><button class="btn sm" data-bsgeo>Look up by name</button>
+            <span class="sm mut" id="bs-geostat">${isNew?'Set this so distances are right':'From '+(b.source==='user'?'your entry':'the demo trip')}</span></div></div>
+        <div class="fld"><label>Region</label><select id="bs-region">${Object.entries(REGIONS).map(([k,r])=>
+          `<option value="${k}" ${k===b.region?'selected':''}>${r.flag} ${r.name}</option>`).join('')}</select></div>
+        <div class="row" style="gap:10px">
+          <div class="fld grow"><label>Arrive</label><input id="bs-a" type="date" value="${b.arrival}"></div>
+          <div class="fld grow"><label>Leave</label><input id="bs-d" type="date" value="${b.departure}"></div></div>
+        <div class="fld"><label>Accommodation</label><input id="bs-acc" value="${esc(b.accommodation||'')}"></div>
+        <div class="fld"><label>Parking</label><input id="bs-park" value="${esc(b.parking||'')}"></div>
+        <div class="fld"><label>Notes</label><textarea id="bs-notes" rows="3">${esc(b.notes||'')}</textarea></div>
+        <button class="btn primary block" data-bssave="${b.id}">${isNew?'Add this base':'Save changes'}</button>
+        ${isNew?'':`<button class="btn block" data-bsactive="${b.id}">Make this my current base</button>
+        <button class="btn block ghost" data-bsdel="${b.id}">Delete base</button>`}
+      </div>
+      ${nearby.length?`<div class="sect"><h3>Within 40 minutes</h3><div class="stack" style="margin-top:10px">${nearby.map(p=>UI.placeRow(p)).join('')}</div></div>`:''}`};
+  },
+
+  /* ---- AI assistant ---- */
+  ask(){
+    return {title:'Ask the copilot', sub:`Knows where you are, the weather, the dog and what you have already seen`, body:`
+      <div class="row wrap" style="gap:7px;margin-bottom:12px">${[
+        'What should we do this afternoon?','Where should we eat?','Somewhere with shade for the dog','Anything on tonight?','Where did we park?'
+      ].map(q=>`<button class="chip" data-askq="${esc(q)}" style="min-height:36px;padding:7px 12px">${esc(q)}</button>`).join('')}</div>
+      <div class="fld"><textarea id="ai-q" rows="3" placeholder="We're in San Sebastián, it's 12:00, we've done the old town, dog is with us, weather is good…"></textarea></div>
+      <button class="btn primary block" style="margin-top:10px" data-askgo>Ask</button>
+      <div id="ai-out" style="margin-top:14px"></div>
+      <div class="banner" style="margin-top:14px">Running on the built-in rule engine, offline. It reads your location, weather, dog mode, visited and saved places. A cloud model can be connected in Settings → Data sources without changing this screen.</div>`};
+  },
+
+  /* ---- search anywhere ---- */
+  find(arg){
+    const q=arg&&arg.q||'';
+    return {title:'Find a place', sub:'Searches OpenStreetMap. Pasted coordinates work offline.', body:`
+      <div class="row" style="gap:8px">
+        <input id="gc-q" class="grow" placeholder="Village, beach, café — or 43.3183, -1.9812" value="${esc(q)}" autocomplete="off">
+        <button class="btn" data-gcsearch>Search</button>
+      </div>
+      ${arg&&arg.intent==='save'?'<div class="banner" style="margin-top:12px">Find the spot, then save it as a place. Coordinates pasted from any map app work too.</div>':''}
+      <div id="gc-out" style="margin-top:14px">
+        <div class="sm mut">Recent finds appear here. Everything you save keeps its real coordinates and works offline.</div>
+      </div>`,
+      after(sheet){
+        const inp=$('#gc-q',sheet);
+        inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); sheet.querySelector('[data-gcsearch]').click(); } });
+        if(q) sheet.querySelector('[data-gcsearch]').click(); else setTimeout(()=>inp.focus(),120);
+      }};
+  },
+
+  /* ---- add or edit a place of your own ---- */
+  newplace(arg){
+    const edit=arg&&arg.editId?getPlace(arg.editId):null;
+    const d=edit?{name:edit.name,lat:edit.coordinates.lat,lng:edit.coordinates.lng,detail:edit.address,
+        category:edit.category,cost:edit.costEstimate,park:edit.parkingDifficulty,dog:edit.dogStatus,
+        why:edit.why,hours:edit.openingHours,visit:edit.visitDuration}:(arg||{});
+    const cat=d.category||'detour';
+    const visits=[[30,60],[45,90],[60,120],[90,150],[120,240],[180,300]];
+    const vsel=(d.visit||[60,120]).join('-');
+    return {title:edit?'Edit place':'Save this place', sub:d.detail?esc(d.detail):'Stored on this phone with its real coordinates', body:`
+      <div class="stack" style="gap:12px">
+        <div class="fld"><label>Name</label><input id="np-name" value="${esc(d.name||'')}" placeholder="What do you call it?"></div>
+        <div class="fld"><label>Coordinates — paste from any map app</label>
+          <input id="np-ll" value="${d.lat!=null?(+d.lat).toFixed(5)+', '+(+d.lng).toFixed(5):''}" placeholder="43.31830, -1.98120">
+          <div class="row" style="gap:8px;margin-top:8px">
+            <button class="btn sm" data-npgeo>Look it up by name</button>
+            ${Geo.live?'<button class="btn sm" data-npgps>Use my position</button>':''}
+          </div></div>
+        <div class="fld"><label>What kind of place</label>
+          <div class="row wrap" style="gap:7px">${Object.entries(CATS).map(([k,c])=>
+            `<button class="chip ${k===cat?'on':''}" data-npcat="${k}" style="min-height:36px;padding:7px 12px">${c.e} ${c.n}</button>`).join('')}</div></div>
+        <div class="fld"><label>How long to allow</label>
+          <select id="np-visit">${visits.map(v=>`<option value="${v.join('-')}" ${v.join('-')===vsel?'selected':''}>${v[0]}–${v[1]} min</option>`).join('')}</select></div>
+        <div class="row" style="gap:10px">
+          <div class="fld grow"><label>Cost each, €</label><input id="np-cost" type="number" min="0" step="1" value="${d.cost!=null?d.cost:0}"></div>
+          <div class="fld grow"><label>Parking</label><select id="np-park">${Object.entries(PARK).map(([k,v])=>
+            `<option value="${k}" ${k===(d.park||'moderate')?'selected':''}>${v.l}</option>`).join('')}</select></div>
+        </div>
+        <div class="fld"><label>Dogs</label><select id="np-dog">${Object.entries(DOG).map(([k,v])=>
+          `<option value="${k}" ${k===(d.dog||'leash')?'selected':''}>${v.l}</option>`).join('')}</select></div>
+        <div class="fld"><label>Opening hours, if you know them</label><input id="np-hours" value="${esc(d.hours||'')}" placeholder="Tue–Sat 10:00–13:30"></div>
+        <div class="fld"><label>Why it is worth it</label><textarea id="np-why" rows="3" placeholder="Practical notes: parking, shade, what to order…">${esc(d.why&&d.why.startsWith('Your own find')?'':d.why||'')}</textarea></div>
+        <button class="btn primary block" data-npsave="${edit?edit.id:''}">${edit?'Save changes':'Add to my places'}</button>
+        ${edit?`<button class="btn block ghost" data-delplace="${edit.id}">Delete this place</button>`:''}
+      </div>`};
+  },
+
+  /* ---- wrapping up a day ---- */
+  dayend(){
+    const act=Today.active;
+    if(!act) return {title:'Nothing running', body:'<div class="empty">No day in progress. Start one from the home screen.</div>'};
+    const {a,plan}=act, st=Today.status();
+    const doneIds=Object.entries(a.state).filter(([i,v])=>v==='done')
+      .map(([i])=>plan.stops[i]&&plan.stops[i].placeId).filter(Boolean);
+    const foods=Store.s.foodLog.filter(f=>f.date===a.date).map(f=>FOODS.find(x=>x.id===f.foodId)).filter(Boolean);
+    const hours=Math.round((Date.now()-a.startedAt)/36e5*10)/10;
+    return {title:esc(plan.title), sub:`${st.done} stops · ${hours}h out · ${mins2h(plan.driveMin)} driving`, body:`
+      ${doneIds.length?`<h3>How were they?</h3>
+        <div class="stack" style="margin:10px 0 4px">${doneIds.map(id=>{
+          const p=getPlace(id), v=Store.visit(id);
+          return `<div class="card"><strong>${esc(p.name)}</strong>
+            <div class="row" style="gap:6px;margin-top:9px">${['loved','good','okay','skip'].map(r=>
+              `<button class="btn sm grow ${v&&v.rating===r?'primary':''}" data-rate="${id}:${r}">${({loved:'Loved',good:'Good',okay:'Okay',skip:'Skip next time'})[r]}</button>`).join('')}</div></div>`;
+        }).join('')}</div>`:'<div class="banner">No stops completed. Ending now just clears the day.</div>'}
+      ${st.skipped?`<div class="sm mut" style="margin-top:10px">${st.skipped} stop${st.skipped===1?'':'s'} skipped — they stay in Saved for another day.</div>`:''}
+      ${foods.length?`<div class="sect"><h3>Bought today</h3>
+        <div class="row wrap" style="gap:8px;margin-top:10px">${foods.map(f=>`<span class="pill">${f.emoji} ${esc(f.name)}</span>`).join('')}</div></div>`:''}
+      <div class="stack" style="margin-top:18px">
+        <button class="btn primary block" data-tdfinish>Save the day to my diary</button>
+        <button class="btn block ghost" data-close>Keep going</button>
+      </div>`};
+  },
+
+  /* ---- settings ---- */
+  settings(){
+    const p=Store.s.prefs;
+    const likeTags=['scenic','food','product','village','city','view','nature','market','hike','festival','motorsport','history','beach'];
+    return {title:'Settings', sub:'Travel profile, stored on this phone only', body:`
+      <div class="card between"><div><strong>🐕 Dog Mode</strong><div class="sm mut">Hides places where dogs are banned</div></div>
+        <button class="sw ${p.dogMode?'on':''}" data-dogmode></button></div>
+      <div class="card between" style="margin-top:10px"><div><strong>Dark theme</strong><div class="sm mut">Easier at night, lighter on battery</div></div>
+        <button class="sw ${p.theme==='dark'?'on':''}" data-theme></button></div>
+
+      <div class="sect"><h3>Where you are</h3>
+        <div class="stack" style="margin-top:10px">
+          <div class="fld"><label>Current base</label><select id="st-base">${Store.s.trip.bases.map(b=>
+            `<option value="${b.id}" ${b.id===Store.s.activeBaseId?'selected':''}>${esc(b.name)}</option>`).join('')}</select></div>
+          <div class="between card"><div class="sm">${Geo.status==='ok'?'Using live GPS position':Geo.status==='denied'?'Location permission denied — using your base':'GPS not in use'}</div>
+            <button class="btn sm" data-geo>${Geo.status==='ok'?'Refresh':'Use GPS'}</button></div>
+          <button class="btn block" data-sheet="find">Search for where you are</button>
+          ${Store.s.manualLocation?`<div class="between card"><div class="sm">Location set manually to <strong>${esc(Store.s.manualLocation.name)}</strong></div>
+            <button class="btn sm" data-clearloc>Clear</button></div>`:''}
+        </div></div>
+
+      <div class="sect"><h3>Travel profile</h3>
+        <div class="sm mut" style="margin:6px 0 10px">Set once. The planner and Explore use it and stop asking.</div>
+        <div class="row wrap" style="gap:7px">${likeTags.map(t=>
+          `<button class="chip ${p.likes.includes(t)?'on':''}" data-like="${t}" style="min-height:36px;padding:7px 12px">${t}</button>`).join('')}</div>
+        <div class="stack" style="margin-top:12px">
+          <div class="fld"><label>Usual pace</label><div class="seg">${['relaxed','normal','busy'].map(i=>
+            `<button data-pace="${i}" class="${p.intensity===i?'on':''}">${i[0].toUpperCase()+i.slice(1)}</button>`).join('')}</div></div>
+          <div class="row" style="gap:10px">
+            <div class="fld grow"><label>Usual start</label><input id="st-start" type="time" value="${p.startTime}"></div>
+            <div class="fld grow"><label>Usual return</label><input id="st-end" type="time" value="${p.returnTime}"></div></div>
+          <div class="fld"><label>Comfortable driving, one way</label><select id="st-drive">${[30,45,60,90,120,180].map(m=>
+            `<option value="${m}" ${m===p.maxDriveMin?'selected':''}>${mins2h(m)}</option>`).join('')}</select></div>
+          <div class="between card"><div><strong>Avoid the crowds</strong><div class="sm mut">Down-ranks the very touristy stops</div></div>
+            <button class="sw ${p.avoidCrowds?'on':''}" data-crowds></button></div>
+        </div></div>
+
+      <div class="sect"><h3>Data sources</h3>
+        <div class="stack" style="margin-top:10px">
+          ${[['weather','Weather','Open-Meteo, no key needed',true],
+             ['tiles','Map tiles','OpenStreetMap raster',true],
+             ['search','Place search','Nominatim · '+Geocode.cached+' lookups cached',true],
+             ['events','Events','Demo data',false],
+             ['routing','Routing','OpenRouteService — needs a key',!!Config.keyFor('routing')],
+             ['ai','AI assistant','Built-in rule engine',!!Config.keyFor('ai')],
+             ['vision','Product scanner','Demo mode',!!Config.keyFor('vision')]]
+            .map(([k,n,d,on])=>`<div class="card between"><div><strong>${n}</strong><div class="sm mut">${d}</div></div>
+              <span class="pill ${on?'good':''}">${on?'Live':'Demo'}</span></div>`).join('')}
+          <div class="fld"><label>Routing key (OpenRouteService)</label><input id="st-key-routing" value="${esc(Config.keyFor('routing')||'')}" placeholder="Paste key — stored on this device only"></div>
+          <div class="fld"><label>AI endpoint</label><input id="st-key-ai" value="${esc(Config.keyFor('ai')||'')}" placeholder="https://your-proxy/ask"></div>
+          <button class="btn block" data-keysave>Save keys</button>
+          <div class="sm mut">Keys live in this browser only and are never written into the app code.</div>
+        </div></div>
+
+      <div class="sect"><h3>Storage</h3>
+        <div class="stack" style="margin-top:10px">
+          <div class="card"><div class="between"><span class="sm">Saved places</span><strong>${Store.s.saved.length}</strong></div>
+            <div class="between"><span class="sm">Places you added</span><strong>${Store.s.userPlaces.length}</strong></div>
+            <div class="between"><span class="sm">Visited</span><strong>${Store.s.visited.length}</strong></div>
+            <div class="between"><span class="sm">Day plans kept</span><strong>${Store.s.plans.length}</strong></div>
+            <div class="between"><span class="sm">Food logged</span><strong>${Store.s.foodLog.length}</strong></div></div>
+          <button class="btn block" data-export>Export everything as JSON</button>
+          <button class="btn block ghost" data-reset>Reset the app</button>
+        </div></div>
+      <div class="sm mut" style="margin-top:18px">Roadtrip Companion · offline-first · demo dataset for southern France, northern Spain and Portugal.</div>`};
+  }
+};
+
+function geoResultsHtml(list,q){
+  if(!list.length) return `<div class="empty"><span class="em">🔍</span>Nothing found for “${esc(q)}”.
+    Add the region — “Getaria Spain” — or paste coordinates.</div>`;
+  Sheets._geo=list;
+  return `<div class="stack">${list.map((r,i)=>{
+    const m=driveMin(Store.here(),{lat:r.lat,lng:r.lng});
+    const tag=r.source==='offline'?'from your offline data':r.source==='coordinates'?'pasted coordinates':r.cached?'cached earlier':'OpenStreetMap';
+    return `<div class="card">
+      <div class="between"><h3 class="ell">${esc(r.name)}</h3><span class="pill">${mins2h(m)} away</span></div>
+      ${r.detail?`<div class="sm mut" style="margin-top:3px">${esc(r.detail)}</div>`:''}
+      <div class="xs mut" style="margin-top:5px">${r.lat.toFixed(4)}, ${r.lng.toFixed(4)} · ${esc(r.kind||'place')} · ${tag}</div>
+      <div class="row wrap" style="gap:6px;margin-top:10px">
+        ${r.placeId?`<button class="pill" data-place="${r.placeId}">Open</button>`
+                   :`<button class="pill warn" data-gcpick="${i}:save">Save as a place</button>`}
+        ${r.baseId?`<button class="pill" data-bsactive="${r.baseId}">Make this my base</button>`
+                  :`<button class="pill" data-gcpick="${i}:here">We are here now</button>`}
+        <button class="pill" data-gcpick="${i}:map">Map</button>
+      </div></div>`;}).join('')}</div>`;
+}
+
+/* =====================================================================
+   8. SHELL — routing, actions, install, service worker
+   ===================================================================== */
+const Shell={
+  offline:!navigator.onLine, installPrompt:null, _t:null,
+  toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('in');
+    clearTimeout(this._t); this._t=setTimeout(()=>t.classList.remove('in'),2200); },
+  go(tab){ Views.tab=tab; Views.render(); window.scrollTo({top:0}); },
+  afterRender(){
+    if(Views.tab==='home'&&this.installPrompt&&!localStorage.getItem('rtc.installed')){
+      const b=el(`<div class="banner" style="margin:0 0 12px"><div class="grow">Install it on the home screen so it works without signal.</div>
+        <button class="btn sm primary" data-install>Install</button></div>`);
+      $('#view').prepend(b);
+    }
+  },
+  async install(){
+    if(!this.installPrompt) return this.toast('Use your browser menu → Add to home screen');
+    this.installPrompt.prompt(); const r=await this.installPrompt.userChoice;
+    if(r.outcome==='accepted'){ localStorage.setItem('rtc.installed','1'); this.toast('Installed'); }
+    this.installPrompt=null; Views.render();
+  },
+  theme(){ document.documentElement.setAttribute('data-theme',Store.s.prefs.theme);
+    $('meta[name=theme-color]').setAttribute('content',Store.s.prefs.theme==='dark'?'#101317':'#F2F1EC'); }
+};
+const _origRender=Views.render.bind(Views);
+Views.render=function(){ _origRender(); Shell.afterRender&&Shell.afterRender(); };
+
+/* ---------- one delegated click handler ---------- */
+document.addEventListener('click',async ev=>{
+  const t=ev.target.closest('[data-tab],[data-dogmode],[data-sheet],[data-geo],[data-regen],[data-quick],[data-place],[data-event],[data-food],[data-swap],[data-startday],[data-planroute],[data-nudge],[data-ecat],[data-efil],[data-stab],[data-base],[data-addbase],[data-export],[data-close],[data-save],[data-showmap],[data-rate],[data-unvisit],[data-mapz],[data-maphere],[data-mfil],[data-mk],[data-mcl],[data-pace],[data-ptag],[data-ptheme],[data-plgen],[data-wrefresh],[data-ewhen],[data-erad],[data-emap],[data-bought],[data-parksave],[data-parkclear],[data-parkmap],[data-parktimer],[data-rtstyle],[data-rtextra],[data-rtgo],[data-bssave],[data-bsactive],[data-bsdel],[data-askq],[data-askgo],[data-like],[data-theme],[data-crowds],[data-keysave],[data-reset],[data-install],[data-plan],[data-gcsearch],[data-gcpick],[data-npcat],[data-npgeo],[data-npgps],[data-npsave],[data-editplace],[data-delplace],[data-bsgeo],[data-clearloc],[data-rtmap],[data-tdstart],[data-tdcancel],[data-tdarrive],[data-tddone],[data-tdskip],[data-tdlinger],[data-tddrop],[data-tdend],[data-tdfinish],[data-showopts]');
+  if(!t) return;
+  const d=t.dataset, S=Store.s;
+
+  /* navigation & global */
+  if(d.tab){ Sheets.close(); Shell.go(d.tab); return; }
+  if(d.close!==undefined){ Sheets.close(); return; }
+  if(d.install!==undefined){ Shell.install(); return; }
+  if(d.sheet){ Sheets.open(d.sheet); return; }
+  if(d.dogmode!==undefined){ S.prefs.dogMode=!S.prefs.dogMode; Store.save(); Views.plans=[];
+    Shell.toast(S.prefs.dogMode?'Dog Mode on — dog-friendly first':'Dog Mode off');
+    Views.render(); if(Sheets._cur) Sheets.refresh(); return; }
+  if(d.theme!==undefined){ S.prefs.theme=S.prefs.theme==='dark'?'light':'dark'; Store.save(); Shell.theme(); Sheets.refresh(); Views.render(); return; }
+  if(d.crowds!==undefined){ S.prefs.avoidCrowds=!S.prefs.avoidCrowds; Store.save(); Views.plans=[]; Sheets.refresh(); return; }
+  if(d.geo!==undefined){ await Geo.ask();
+    if(Geo.status!=='ok') Shell.toast('Location unavailable — pick your base in Settings'); else Shell.toast('Using your live position');
+    Views.plans=[]; Views.render(); if(Sheets._cur) Sheets.refresh(); return; }
+
+  /* home */
+  if(d.regen!==undefined){ Views.regenPlans(); Shell.toast('Three new days'); Views.render(); return; }
+  if(d.quick){
+    const q=d.quick;
+    if(q==='ask') return Sheets.open('ask');
+    if(q==='parking') return Sheets.open('parking');
+    if(q==='events') return Sheets.open('events');
+    if(q==='tomorrow'){ Sheets.open('planner'); return; }
+    if(q==='savehere'){
+      if(Geo.live){
+        Shell.toast('Naming this spot…');
+        const r=await Geocode.reverse(Geo.live.lat,Geo.live.lng);
+        Sheets.open('newplace',{name:r?r.name:'Here',detail:r?r.detail:'From your GPS position',
+          lat:Geo.live.lat,lng:Geo.live.lng});
+      } else if(Store.s.manualLocation){
+        const m=Store.s.manualLocation;
+        Sheets.open('newplace',{name:m.name,detail:'Your set location',lat:m.lat,lng:m.lng});
+      } else Sheets.open('find',{intent:'save'});
+      return;
+    }
+    const map={food:['food','market','product'],view:['view'],dog:['dog']}[q]||[];
+    const plan=Planner.build(q==='dog'?'relaxed':'explore',{prefs:map});
+    if(plan){ Store.savePlan(plan); Sheets.open('plan',plan.id); } else Shell.toast('Nothing matches — try raising the driving limit');
+    return;
+  }
+
+  /* places / events / food */
+  if(d.place){ Sheets.open('place',d.place); return; }
+  if(d.plan){ Sheets.open('plan',d.plan); return; }
+  if(d.event||d.emap){
+    const e=EVENTS.find(x=>x.id===(d.event||d.emap));
+    if(!e) return;
+    if(d.emap){ Sheets.close(); MapView.goto(e.coordinates,11); return; }
+    Shell.toast(`${e.name} · ${e.time} · ${driveKm(Store.here(),e.coordinates)} km`); return;
+  }
+  if(d.food){ Sheets.close(); setTimeout(()=>Sheets.open('food',d.food),20); return; }
+  if(d.bought){ Store.boughtFood(d.bought); Shell.toast('Added to the trip diary'); Sheets.refresh(); return; }
+
+  /* plan actions */
+  if(d.swap){ const [pid,idx]=d.swap.split(':');
+    const plan=Views.plans.find(p=>p.id===pid)||S.plans.find(p=>p.id===pid);
+    if(plan){ Planner.replaceStop(plan,+idx); Store.savePlan(plan); Shell.toast('Stop replaced'); Views.render(); if(Sheets._cur) Sheets.refresh(); }
+    return; }
+  if(d.nudge){ const [pid,kind]=d.nudge.split(':');
+    const i=Views.plans.findIndex(p=>p.id===pid);
+    const plan=i>=0?Views.plans[i]:S.plans.find(p=>p.id===pid);
+    if(plan){ const np=Planner.nudge(plan,kind); np.tag=plan.tag; if(i>=0) Views.plans[i]=np; Store.savePlan(np);
+      Shell.toast({'less-driving':'Tightened up the driving',food:'More food',nature:'More nature',towns:'More towns',relax:'Slowed it down'}[kind]);
+      Views.render(); }
+    return; }
+  if(d.startday){ const plan=Views.plans.find(p=>p.id===d.startday)||S.plans.find(p=>p.id===d.startday);
+    if(plan){
+      plan.stops.filter(s=>s.placeId).forEach(s=>{ if(!Store.isSaved(s.placeId)) Store.toggleSave(s.placeId); });
+      Today.start(plan); Views.showOptions=false;
+      Shell.toast(plan.date>todayISO()?'Saved for '+new Date(plan.date).toLocaleDateString([], {weekday:'long'}):'Day started — stops kept offline');
+      Sheets.close(); Shell.go('home'); }
+    return; }
+
+  /* the live day */
+  if(d.showopts!==undefined){ Views.showOptions=true; Views.render(); return; }
+  if(d.tdstart!==undefined){ const act=Today.active;
+    if(act){ act.a.date=todayISO(); act.plan.date=todayISO(); act.a.startedAt=Date.now(); Today.retime(); Store.save(); }
+    Shell.toast('Day started'); Views.render(); return; }
+  if(d.tdcancel!==undefined){ Today.cancel(); Shell.toast('Cleared'); Views.render(); return; }
+  if(d.tdarrive!==undefined){ Today.arrive(); Views.render(); return; }
+  if(d.tddone!==undefined){ const s=Today.done();
+    Shell.toast(s&&s.placeId?`${getPlace(s.placeId).name} added to your diary`:'Done');
+    Views.render(); return; }
+  if(d.tdskip!==undefined){ Today.skip(); Shell.toast('Skipped — still in Saved'); Views.render(); return; }
+  if(d.tdlinger){ Today.linger(+d.tdlinger); Shell.toast('Thirty more minutes here'); Views.render(); return; }
+  if(d.tddrop!==undefined){ Today.dropLast(); Shell.toast('Dropped the last stop'); Views.render(); return; }
+  if(d.tdend!==undefined){ Sheets.open('dayend'); return; }
+  if(d.tdfinish!==undefined){ const e=Today.finish();
+    Sheets.close(); Views.savedTab='timeline';
+    Shell.toast(e?`Day saved — ${e.done} stop${e.done===1?'':'s'}`:'Cleared');
+    Shell.go('home'); return; }
+  if(d.planroute){ const plan=Views.plans.find(p=>p.id===d.planroute)||S.plans.find(p=>p.id===d.planroute);
+    if(plan){ Sheets.close(); MapView.fit(plan.stops.filter(s=>s.placeId).map(s=>getPlace(s.placeId).coordinates).concat([Store.here()])); }
+    return; }
+
+  /* explore */
+  if(d.ecat){ Views.exploreCat=d.ecat; Views.render(); return; }
+  if(d.efil){ Views.exploreFilters.has(d.efil)?Views.exploreFilters.delete(d.efil):Views.exploreFilters.add(d.efil); Views.render(); return; }
+  if(d.stab){ Views.savedTab=d.stab; Views.render(); return; }
+
+  /* saving / rating */
+  if(d.save){ const added=Store.toggleSave(d.save); Shell.toast(added?'Saved — available offline':'Removed'); Sheets.refresh(); Views.render(); return; }
+  if(d.rate){ const [id,r]=d.rate.split(':'); Store.markVisited(id,r); Shell.toast('Added to your diary'); Sheets.refresh(); Views.render(); return; }
+  if(d.unvisit){ Store.unvisit(d.unvisit); Sheets.refresh(); Views.render(); return; }
+  if(d.showmap){ const p=getPlace(d.showmap); Sheets.close(); MapView.goto(p.coordinates,12); return; }
+
+  /* map */
+  if(d.mapz){ MapView.zoomBy(+d.mapz); return; }
+  if(d.maphere){ MapView.goto(Store.here(),11); return; }
+  if(d.mfil){ MapView.setFilter(d.mfil); return; }
+  if(d.mcl){ const pts=d.mcl.split('|').map(s=>{const [lat,lng]=s.split(',').map(Number);return {lat,lng};}); MapView.fit(pts); return; }
+  if(d.mk){ const [type,id]=d.mk.split(':');
+    if(type==='place') Sheets.open('place',id);
+    else if(type==='event'){ const e=EVENTS.find(x=>x.id===id); Shell.toast(`${e.name} · ${e.time}`); }
+    else if(type==='base') Sheets.open('base',id);
+    else if(type==='parking') Sheets.open('parking');
+    return; }
+
+  /* planner sheet */
+  if(d.pace){ S.prefs.intensity=d.pace; Store.save();
+    t.parentElement.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===t)); return; }
+  if(d.ptag){ t.classList.toggle('on'); return; }
+  if(d.ptheme){ t.parentElement.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===t)); return; }
+  if(d.plgen!==undefined){
+    const sheet=t.closest('.sheet');
+    const baseId=$('#pl-from',sheet).value, b=S.trip.bases.find(x=>x.id===baseId);
+    const theme=sheet.querySelector('[data-ptheme].on')?.dataset.ptheme||'explore';
+    const prefs=[...sheet.querySelectorAll('[data-ptag].on')].map(x=>x.dataset.ptag);
+    S.prefs.startTime=$('#pl-start',sheet).value; S.prefs.returnTime=$('#pl-end',sheet).value;
+    S.prefs.maxDriveMin=+$('#pl-drive',sheet).value; Store.save();
+    const plan=Planner.build(theme,{from:{name:b.name,...b.coordinates},start:S.prefs.startTime,end:S.prefs.returnTime,
+      maxDriveMin:S.prefs.maxDriveMin,prefs,dog:S.prefs.dogMode});
+    const out=$('#pl-out',sheet);
+    if(!plan){ out.innerHTML='<div class="banner">Nothing fits those limits. Allow more driving time or drop a preference.</div>'; return; }
+    Store.savePlan(plan);
+    out.innerHTML=UI.planCard(plan);
+    out.scrollIntoView({behavior:'smooth',block:'nearest'});
+    return; }
+
+  /* weather / events sheets */
+  if(d.wrefresh!==undefined){ await Weather.refresh(true); Sheets.refresh(); return; }
+  if(d.ewhen){ Views.eventWhen=d.ewhen; Sheets.refresh(); return; }
+  if(d.erad){ Views.eventRadius=+d.erad; Sheets.refresh(); return; }
+
+  /* parking */
+  if(d.parksave!==undefined){
+    const sheet=t.closest('.sheet'), here=Store.here();
+    S.parking={id:uid('pk'),coordinates:{lat:here.lat,lng:here.lng},at:Date.now(),
+      note:$('#pk-note',sheet).value,expires:$('#pk-exp',sheet).value||null,photo:Sheets._pendingPhoto||S.parking?.photo||null};
+    Sheets._pendingPhoto=null; Store.save(); Shell.toast('Parking spot saved'); Sheets.refresh(); return; }
+  if(d.parkclear!==undefined){ S.parking=null; Store.save(); Sheets.refresh(); return; }
+  if(d.parkmap!==undefined){ if(S.parking){ Sheets.close(); MapView.goto(S.parking.coordinates,15);
+    Shell.toast(`${Math.round(haversine(Store.here(),S.parking.coordinates)*1000)} m to the car`); } return; }
+  if(d.parktimer!==undefined){
+    const exp=S.parking?.expires; if(!exp) return Shell.toast('Set a “paid until” time first');
+    const [h,m]=exp.split(':').map(Number); const now=new Date(); const target=new Date();
+    target.setHours(h,m-10,0,0); if(target<now) target.setDate(target.getDate()+1);
+    const ms=target-now;
+    if('Notification' in window && Notification.permission!=='granted') await Notification.requestPermission();
+    setTimeout(()=>{ try{ new Notification('Parking expires in 10 minutes',{body:S.parking?.note||'Move the car'}); }
+      catch(e){ Shell.toast('Parking expires in 10 minutes'); } },Math.min(ms,2**31-1));
+    Shell.toast(`Reminder set for ${pad(target.getHours())}:${pad(target.getMinutes())}`); return; }
+
+  /* scenic route */
+  if(d.rtstyle||d.rtextra){ t.parentElement.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===t)); return; }
+  if(d.rtgo!==undefined){
+    const sheet=t.closest('.sheet');
+    const a=S.trip.bases.find(x=>x.id===$('#rt-a',sheet).value), b=S.trip.bases.find(x=>x.id===$('#rt-b',sheet).value);
+    const style=sheet.querySelector('[data-rtstyle].on')?.dataset.rtstyle||'scenic';
+    const extra=+(sheet.querySelector('[data-rtextra].on')?.dataset.rtextra||30);
+    const out=$('#rt-out',sheet);
+    if(!a||!b||a.id===b.id){ out.innerHTML='<div class="banner">Pick two different places.</div>'; return; }
+    const direct=driveMin(a.coordinates,b.coordinates);
+    const want={coast:['beach','view'],mountains:['nature','hike','view'],villages:['village'],
+      'food stops':['food','market','product'],'food':['food','market','product'],scenic:['view','village','nature'],fastest:[]}[style]||[];
+    let stops=[];
+    if(want.length){
+      stops=allPlaces().filter(p=>want.includes(p.category)||p.tags.some(x=>want.includes(x)))
+        .map(p=>({p,det:driveMin(a.coordinates,p.coordinates)+driveMin(p.coordinates,b.coordinates)-direct}))
+        .filter(x=>x.det<=extra+18).sort((x,y)=>x.det-y.det).slice(0,4)
+        .sort((x,y)=>driveMin(a.coordinates,x.p.coordinates)-driveMin(a.coordinates,y.p.coordinates));
+    }
+    let total=direct, cur=a.coordinates;
+    const legs=stops.map(({p})=>{ const m=driveMin(cur,p.coordinates); cur=p.coordinates; return {p,m}; });
+    total=legs.reduce((s,l)=>s+l.m,0)+driveMin(cur,b.coordinates);
+    const route={id:uid('rt'),from:a.name,to:b.name,style,directMin:direct,totalMin:total,stops:stops.map(s=>s.p.id)};
+    S.routes.unshift(route); S.routes=S.routes.slice(0,10); Store.save();
+    out.innerHTML=`
+      <div class="card" style="margin-top:12px">
+        <div class="between"><h3>${esc(a.name)} → ${esc(b.name)}</h3><span class="pill ${total-direct>extra?'warn':'good'}">+${mins2h(total-direct)}</span></div>
+        <div class="sm mut" style="margin-top:4px">${mins2h(total)} total · direct is ${mins2h(direct)} · ${driveKm(a.coordinates,b.coordinates)} km as the road runs</div>
+        <div class="tl" style="margin-top:12px">
+          <div class="stop"><span class="t">start</span><span class="n">${esc(a.name)}</span></div>
+          ${legs.map(l=>`<div class="stop"><span class="t">+${l.m}m</span><span class="n">${esc(l.p.name)}</span>
+            <button class="pill" data-place="${l.p.id}">open</button></div>
+            <div class="d" style="grid-column:2/4;margin:-7px 0 0">${esc(l.p.why.split('.')[0])}.</div>`).join('')}
+          <div class="stop"><span class="t">end</span><span class="n">${esc(b.name)}</span></div>
+        </div>
+        <button class="btn sm" style="margin-top:12px" data-rtmap="${route.id}">Show the whole route</button>
+      </div>${stops.length?'':'<div class="banner" style="margin-top:12px">Nothing worth the detour within that extra time. Try +60 min or a different character.</div>'}`;
+    return; }
+  if(d.rtmap){ const r=S.routes.find(x=>x.id===d.rtmap); if(!r) return;
+    const pts=r.stops.map(id=>getPlace(id).coordinates)
+      .concat([S.trip.bases.find(b=>b.name===r.from).coordinates,S.trip.bases.find(b=>b.name===r.to).coordinates]);
+    Sheets.close(); MapView.fit(pts); return; }
+
+  /* place search */
+  if(d.gcsearch!==undefined){
+    const sheet=t.closest('.sheet'), q=$('#gc-q',sheet).value.trim(), out=$('#gc-out',sheet);
+    if(!q) return;
+    out.innerHTML='<div class="sm mut">Searching…</div>';
+    const list=await Geocode.search(q);
+    out.innerHTML=geoResultsHtml(list,q);
+    return; }
+  if(d.gcpick){
+    const [i,act]=d.gcpick.split(':'); const r=Sheets._geo?.[+i]; if(!r) return;
+    if(act==='save'){ Sheets.close(); setTimeout(()=>Sheets.open('newplace',{name:r.name,detail:r.detail,lat:r.lat,lng:r.lng}),20); return; }
+    if(act==='here'){
+      S.manualLocation={name:r.name,lat:r.lat,lng:r.lng};
+      Store.save(); Views.plans=[]; Weather.refresh(true);
+      Shell.toast('Location set to '+r.name); Sheets.close(); Shell.go('home'); return; }
+    if(act==='map'){ Sheets.close(); MapView.goto({lat:r.lat,lng:r.lng},13); return; }
+    return; }
+  if(d.clearloc!==undefined){ S.manualLocation=null; Store.save(); Views.plans=[]; Weather.refresh(true);
+    Shell.toast('Back to your base'); Sheets.refresh(); Views.render(); return; }
+
+  /* new / edited place of your own */
+  if(d.npcat){ t.parentElement.querySelectorAll('[data-npcat]').forEach(b=>b.classList.toggle('on',b===t)); return; }
+  if(d.npgps!==undefined){
+    if(!Geo.live) return Shell.toast('No GPS position yet');
+    const sheet=t.closest('.sheet');
+    $('#np-ll',sheet).value=Geo.live.lat.toFixed(5)+', '+Geo.live.lng.toFixed(5);
+    Shell.toast('Using your position'); return; }
+  if(d.npgeo!==undefined){
+    const sheet=t.closest('.sheet'), name=$('#np-name',sheet).value.trim();
+    if(!name) return Shell.toast('Type a name first');
+    Shell.toast('Looking it up…');
+    const list=await Geocode.search(name);
+    if(!list.length) return Shell.toast('Nothing found — try adding the region');
+    $('#np-ll',sheet).value=list[0].lat.toFixed(5)+', '+list[0].lng.toFixed(5);
+    Shell.toast('Found '+list[0].name+(list[0].detail?' — '+list[0].detail.split(',')[0]:'')); return; }
+  if(d.npsave!==undefined){
+    const sheet=t.closest('.sheet');
+    const name=$('#np-name',sheet).value.trim();
+    const ll=Geocode.parseCoords($('#np-ll',sheet).value);
+    if(!name) return Shell.toast('Give it a name');
+    if(!ll) return Shell.toast('Coordinates look wrong — use “43.31830, -1.98120”');
+    const payload={ name, lat:ll.lat, lng:ll.lng,
+      category:sheet.querySelector('[data-npcat].on')?.dataset.npcat||'detour',
+      visit:$('#np-visit',sheet).value.split('-').map(Number),
+      cost:+$('#np-cost',sheet).value||0,
+      park:$('#np-park',sheet).value, dog:$('#np-dog',sheet).value,
+      hours:$('#np-hours',sheet).value.trim()||null, why:$('#np-why',sheet).value.trim() };
+    let p;
+    if(d.npsave){ p=Places.update(d.npsave,{name:payload.name,coordinates:{lat:ll.lat,lng:ll.lng},
+        category:payload.category,visitDuration:payload.visit,costEstimate:payload.cost,
+        parkingDifficulty:payload.park,dogStatus:payload.dog,openingHours:payload.hours,
+        why:payload.why||'Your own find.',region:Places.nearestRegion({lat:ll.lat,lng:ll.lng})});
+      if(p) p.country=REGIONS[p.region].country;
+      Shell.toast('Updated'); }
+    else { p=Places.create(payload); Views.plans=[]; Shell.toast('Saved — it now counts in day plans'); }
+    Sheets.close(); Views.render();
+    if(p) setTimeout(()=>Sheets.open('place',p.id),30);
+    return; }
+  if(d.editplace){ const id=d.editplace; Sheets.close(); setTimeout(()=>Sheets.open('newplace',{editId:id}),20); return; }
+  if(d.delplace){
+    if(!confirm('Delete this place and its notes?')) return;
+    Places.remove(d.delplace); Views.plans=[]; Sheets.close(); Shell.toast('Deleted'); Views.render(); return; }
+
+  /* trip / bases */
+  if(d.base){ Sheets.open('base',d.base); return; }
+  if(d.addbase!==undefined){ Sheets.open('base','__new__'); return; }
+  if(d.bsgeo!==undefined){
+    const sheet=t.closest('.sheet'), name=$('#bs-name',sheet).value.trim();
+    const region=$('#bs-region',sheet).value;
+    if(!name) return Shell.toast('Type the name first');
+    $('#bs-geostat',sheet).textContent='Looking up…';
+    const list=await Geocode.search(name+', '+REGIONS[region].country);
+    if(!list.length){ $('#bs-geostat',sheet).textContent='Nothing found — paste coordinates instead'; return; }
+    $('#bs-ll',sheet).value=list[0].lat.toFixed(5)+', '+list[0].lng.toFixed(5);
+    $('#bs-geostat',sheet).textContent=list[0].detail||list[0].name;
+    return; }
+  if(d.bssave){
+    const sheet=t.closest('.sheet'); const id=d.bssave;
+    const region=$('#bs-region',sheet).value;
+    const ll=Geocode.parseCoords($('#bs-ll',sheet).value);
+    let b=S.trip.bases.find(x=>x.id===id);
+    const payload={name:$('#bs-name',sheet).value||'Unnamed base',region,
+      arrival:$('#bs-a',sheet).value,departure:$('#bs-d',sheet).value,
+      accommodation:$('#bs-acc',sheet).value,parking:$('#bs-park',sheet).value,notes:$('#bs-notes',sheet).value};
+    if(b) Object.assign(b,payload);
+    else { b={id:uid('b'),...payload,source:'user'}; S.trip.bases.push(b); }
+    if(ll) b.coordinates={lat:ll.lat,lng:ll.lng};
+    else if(!b.coordinates) b.coordinates={...REGIONS[region].c};
+    S.trip.bases.sort((x,y)=>x.arrival<y.arrival?-1:1);
+    Store.save(); Shell.toast('Trip updated'); Sheets.close(); Shell.go('trip'); return; }
+  if(d.bsactive){ S.activeBaseId=d.bsactive; Store.save(); Views.plans=[]; Weather.refresh(true);
+    Shell.toast('Base changed'); Sheets.close(); Shell.go('home'); return; }
+  if(d.bsdel){ S.trip.bases=S.trip.bases.filter(b=>b.id!==d.bsdel);
+    if(S.activeBaseId===d.bsdel) S.activeBaseId=S.trip.bases[0]?.id;
+    Store.save(); Sheets.close(); Shell.go('trip'); return; }
+
+  /* ai */
+  if(d.askq||d.askgo!==undefined){
+    const sheet=t.closest('.sheet'), box=$('#ai-out',sheet);
+    const q=d.askq||$('#ai-q',sheet).value.trim();
+    if(!q) return;
+    if(d.askq) $('#ai-q',sheet).value=q;
+    box.innerHTML='<div class="sm mut">Thinking…</div>';
+    const a=await AI.ask(q);
+    box.innerHTML=`<div class="card"><div style="white-space:pre-wrap">${esc(a)}</div></div>`;
+    return; }
+
+  /* settings */
+  if(d.like){ const i=S.prefs.likes.indexOf(d.like);
+    i>=0?S.prefs.likes.splice(i,1):S.prefs.likes.push(d.like); Store.save(); Views.plans=[]; t.classList.toggle('on'); return; }
+  if(d.keysave!==undefined){ const sheet=t.closest('.sheet');
+    Config.setKey('routing',$('#st-key-routing',sheet).value.trim());
+    Config.setKey('ai',$('#st-key-ai',sheet).value.trim());
+    Shell.toast('Keys saved on this device'); Sheets.refresh(); return; }
+  if(d.export!==undefined){
+    const blob=new Blob([Store.export()],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download='roadtrip-'+todayISO()+'.json'; a.click(); Shell.toast('Exported'); return; }
+  if(d.reset!==undefined){ if(confirm('Reset the app and delete saved places, visits and notes?')) Store.reset(); return; }
+});
+
+/* change handlers: selects and notes */
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.id==='st-base'){ Store.s.activeBaseId=t.value; Store.save(); Views.plans=[]; Weather.refresh(true); Views.render(); Shell.toast('Base changed'); }
+  if(t.id==='st-start'){ Store.s.prefs.startTime=t.value; Store.save(); }
+  if(t.id==='st-end'){ Store.s.prefs.returnTime=t.value; Store.save(); }
+  if(t.id==='st-drive'){ Store.s.prefs.maxDriveMin=+t.value; Store.save(); Views.plans=[]; }
+  if(t.dataset.note){ Store.s.notes[t.dataset.note]=t.value; Store.save(); }
+});
+
+/* ---------- Android soft keyboard ----------
+   A bottom sheet anchored to the layout viewport ends up behind the keyboard,
+   which looks like the app has swapped screens. Track the visual viewport,
+   lift the sheet by exactly the keyboard height, and scroll the focused field
+   into view once the keyboard has finished animating. */
+(function keyboard(){
+  const vv=window.visualViewport;
+  const sync=()=>{
+    const h=vv?vv.height:window.innerHeight;
+    const kb=Math.max(0,Math.round(window.innerHeight-(h+(vv?vv.offsetTop:0))));
+    const r=document.documentElement.style;
+    r.setProperty('--kb',kb+'px');
+    r.setProperty('--sheet-max',Math.round(h*0.94)+'px');
+    document.body.classList.toggle('kb',kb>120);
+  };
+  if(vv){ vv.addEventListener('resize',sync); vv.addEventListener('scroll',sync); }
+  window.addEventListener('resize',sync);
+  window.addEventListener('orientationchange',()=>setTimeout(sync,250));
+  document.addEventListener('focusin',e=>{
+    const f=e.target;
+    if(!f||!f.matches||!f.matches('input,textarea,select')) return;
+    setTimeout(()=>{ sync(); try{ f.scrollIntoView({block:'center'}); }catch(_){ } },340);
+  });
+  document.addEventListener('focusout',()=>setTimeout(sync,120));
+  sync();
+})();
+
+/* ---------- PWA plumbing ---------- */
+/* a running day re-times itself every minute, so the strip never goes stale */
+setInterval(()=>{ if(Views.tab==='home'&&!Sheets._cur&&Today.isToday()) Views.render(); },60000);
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); Shell.installPrompt=e; Views.render(); });
+window.addEventListener('appinstalled',()=>{ localStorage.setItem('rtc.installed','1'); Shell.toast('Installed'); });
+window.addEventListener('online',()=>{ Shell.offline=false; Weather.refresh(true); Views.render(); Shell.toast('Back online'); });
+window.addEventListener('offline',()=>{ Shell.offline=true; Views.render(); Shell.toast('Offline — using saved data'); });
+if('serviceWorker' in navigator && location.protocol==='https:' && window.self===window.top){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+
+/* ---------- boot ---------- */
+Shell.theme();
+/* manifest shortcuts and deep links: #map, #ask, #parking, #events, #food, #trip */
+(function hashRoute(){
+  const h=(location.hash||'').replace('#','');
+  if(!h) return;
+  if(['home','explore','map','trip','saved'].includes(h)) Views.tab=h;
+  else if(['ask','parking','events','food','planner','settings','weather','route','scanner'].includes(h))
+    setTimeout(()=>Sheets.open(h),60);
+})();
+window.addEventListener('hashchange',()=>location.reload());
+Views.render();
+Weather.refresh().then(()=>{ Views.plans=[]; Views.render(); });
+if(Store.s.prefs.askedLocation && Geo.status==='idle' && navigator.permissions?.query){
+  navigator.permissions.query({name:'geolocation'}).then(p=>{ if(p.state==='granted') Geo.ask(); }).catch(()=>{});
+}
+</script>
+</body>
+</html>
